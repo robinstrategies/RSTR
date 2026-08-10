@@ -2,11 +2,14 @@
   --bg: #010906;
   --bg-soft: #072d15;
   --bg-panel: rgba(7, 45, 21, 0.72);
+  --bg-panel-strong: rgba(3, 17, 9, 0.92);
   --line: rgba(115, 235, 150, 0.18);
+  --line-strong: rgba(115, 235, 150, 0.34);
   --text: #f3f0d5;
   --muted: #bfd4bd;
   --accent: #358245;
   --accent-bright: #73eb96;
+  --cream: #ebecc2;
   --shadow: rgba(0, 0, 0, 0.35);
 }
 
@@ -19,8 +22,12 @@ body {
   margin: 0;
   padding: 0;
   background:
-    radial-gradient(circle at top, rgba(53, 130, 69, 0.22), transparent 38%),
+    radial-gradient(circle at top, rgba(53, 130, 69, 0.28), transparent 32%),
+    radial-gradient(circle at 80% 20%, rgba(115, 235, 150, 0.08), transparent 18%),
+    linear-gradient(90deg, rgba(53, 130, 69, 0.08) 1px, transparent 1px),
+    linear-gradient(rgba(53, 130, 69, 0.06) 1px, transparent 1px),
     linear-gradient(180deg, #031109 0%, #010906 100%);
+  background-size: auto, auto, 44px 44px, 44px 44px, auto;
   color: var(--text);
   font-family: "Inter", sans-serif;
 }
@@ -37,6 +44,7 @@ a {
 .hero,
 .page-hero {
   padding: 28px 24px 56px;
+  position: relative;
 }
 
 .topbar {
@@ -123,8 +131,31 @@ h3 {
   padding: 30px;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(7, 45, 21, 0.7), rgba(1, 9, 6, 0.92));
+  background:
+    radial-gradient(circle at top, rgba(115, 235, 150, 0.12), transparent 32%),
+    linear-gradient(180deg, rgba(7, 45, 21, 0.76), rgba(1, 9, 6, 0.94));
   box-shadow: 0 18px 60px var(--shadow);
+  overflow: hidden;
+}
+
+.hero-copy::after,
+.page-title-wrap::after,
+.content-wrap::after,
+.card::after,
+.doc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(115, 235, 150, 0.06), transparent 34%, transparent 66%, rgba(235, 236, 194, 0.04));
+}
+
+.hero-copy,
+.page-title-wrap,
+.content-wrap,
+.card,
+.doc-card {
+  position: relative;
 }
 
 .cta-row {
@@ -146,12 +177,13 @@ h3 {
 }
 
 .button-primary {
-  background: var(--accent);
+  background: linear-gradient(135deg, #358245, #4fa75f);
   color: white;
+  border-color: rgba(115, 235, 150, 0.32);
 }
 
 .button-secondary {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.04);
 }
 
 .panel {
@@ -167,7 +199,8 @@ h3 {
 .card,
 .doc-card,
 .content-wrap {
-  background: var(--bg-panel);
+  background:
+    linear-gradient(180deg, rgba(7, 45, 21, 0.78), rgba(1, 9, 6, 0.9));
   border: 1px solid var(--line);
   border-radius: 24px;
   box-shadow: 0 18px 60px var(--shadow);
@@ -191,6 +224,7 @@ h3 {
 .doc-card:hover {
   transform: translateY(-2px);
   border-color: rgba(115, 235, 150, 0.34);
+  box-shadow: 0 22px 70px rgba(0, 0, 0, 0.42);
 }
 
 .page-hero {
@@ -201,7 +235,9 @@ h3 {
   padding: 26px 30px;
   border: 1px solid var(--line);
   border-radius: 28px;
-  background: linear-gradient(180deg, rgba(7, 45, 21, 0.66), rgba(1, 9, 6, 0.92));
+  background:
+    radial-gradient(circle at top, rgba(115, 235, 150, 0.1), transparent 28%),
+    linear-gradient(180deg, rgba(7, 45, 21, 0.72), rgba(1, 9, 6, 0.94));
 }
 
 .content-wrap {
@@ -209,8 +245,27 @@ h3 {
   margin: 0 24px 42px;
 }
 
+.content-wrap h2 {
+  margin-top: 34px;
+}
+
+.content-wrap blockquote {
+  margin: 24px 0;
+  padding: 18px 20px;
+  border-left: 3px solid var(--accent-bright);
+  border-radius: 0 18px 18px 0;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--cream);
+  font-family: "Cinzel", serif;
+  line-height: 1.6;
+}
+
 .content-wrap ul {
   padding-left: 20px;
+}
+
+.content-wrap strong {
+  color: var(--cream);
 }
 
 .meta {
@@ -226,9 +281,58 @@ h3 {
   color: var(--accent-bright);
 }
 
+.stat-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 26px;
+}
+
+.stat {
+  padding: 18px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--line);
+}
+
+.stat-label {
+  margin: 0 0 8px;
+  color: var(--accent-bright);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.75rem;
+}
+
+.stat-value {
+  margin: 0;
+  font-family: "Cinzel", serif;
+  font-size: 1.1rem;
+  color: var(--cream);
+}
+
+.split-callout {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.callout-panel {
+  padding: 22px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.callout-panel p:last-child {
+  margin-bottom: 0;
+}
+
 @media (max-width: 900px) {
   .grid-two,
-  .doc-grid {
+  .doc-grid,
+  .stat-row,
+  .split-callout {
     grid-template-columns: 1fr;
   }
 
