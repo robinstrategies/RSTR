@@ -113,7 +113,9 @@ a {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(circle at 50% 46%, rgba(121, 241, 168, 0.34), rgba(48, 181, 102, 0.14) 11%, transparent 25%);
+  background:
+    radial-gradient(ellipse at 50% 63%, rgba(121, 241, 168, 0.58), rgba(48, 181, 102, 0.28) 18%, transparent 42%),
+    radial-gradient(ellipse at 50% 44%, rgba(235, 255, 236, 0.34), rgba(121, 241, 168, 0.18) 16%, transparent 38%);
   mix-blend-mode: screen;
   animation: crystal-pulse 4.8s ease-in-out infinite;
 }
@@ -129,24 +131,24 @@ a {
 }
 
 .crystal-glow::before {
-  width: 210px;
-  height: 360px;
+  width: 340px;
+  height: 540px;
   background: linear-gradient(180deg, rgba(235, 255, 236, 0.72), rgba(121, 241, 168, 0.5) 48%, rgba(35, 217, 104, 0.32));
   clip-path: polygon(50% 0, 100% 34%, 50% 50%, 0 34%, 50% 0, 50% 50%, 100% 66%, 50% 100%, 0 66%, 50% 50%);
-  filter: blur(10px) drop-shadow(0 0 38px rgba(121, 241, 168, 0.88));
-  opacity: 0.42;
+  filter: blur(18px) drop-shadow(0 0 90px rgba(121, 241, 168, 0.95));
+  opacity: 0.5;
   transform: translate(-50%, -50%);
   animation: crystal-core-glow 3.2s ease-in-out infinite;
 }
 
 .crystal-glow::after {
-  width: 420px;
-  height: 420px;
+  width: 840px;
+  height: 620px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(121, 241, 168, 0.48), rgba(48, 181, 102, 0.18) 32%, transparent 68%);
-  filter: blur(18px);
-  opacity: 0.4;
-  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(121, 241, 168, 0.52), rgba(48, 181, 102, 0.22) 34%, transparent 72%);
+  filter: blur(28px);
+  opacity: 0.48;
+  transform: translate(-50%, -38%);
   animation: crystal-halo-breathe 4.8s ease-in-out infinite;
 }
 
@@ -557,11 +559,11 @@ h3 {
 @keyframes crystal-halo-breathe {
   0%, 100% {
     opacity: 0.3;
-    transform: translate(-50%, -50%) scale(0.92);
+    transform: translate(-50%, -38%) scale(0.92);
   }
   50% {
-    opacity: 0.68;
-    transform: translate(-50%, -50%) scale(1.08);
+    opacity: 0.78;
+    transform: translate(-50%, -38%) scale(1.1);
   }
 }
 
