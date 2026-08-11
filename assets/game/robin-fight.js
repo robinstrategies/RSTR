@@ -7,6 +7,8 @@ const healthFill = document.getElementById("healthFill");
 const startPanel = document.getElementById("startPanel");
 const playerForm = document.getElementById("playerForm");
 const playerNameInput = document.getElementById("playerName");
+const scoreboardTitle = document.getElementById("scoreboardTitle");
+const scoreboardStatus = document.getElementById("scoreboardStatus");
 const scoreList = document.getElementById("scoreList");
 const resetScores = document.getElementById("resetScores");
 const musicToggle = document.getElementById("musicToggle");
@@ -17,11 +19,14 @@ const GROUND_TOP = 420;
 const GROUND_BOTTOM = 646;
 const SCORE_KEY = "robinman-alley-fight-scores";
 const MUSIC_KEY = "robinman-byte-fighter-music";
+const LEADERBOARD_RPC = "get_robin_fight_leaderboard";
+const SUBMIT_SCORE_FUNCTION = "submit-robin-score";
 
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
   robinman: loadImage("../assets/game/robinman-player-clean.png"),
-  villains: loadImage("../assets/game/villains-sheet-clean.png"),
+  villains: loadImage("../assets/game/villains-bear-market.png"),
+  bear: loadImage("../assets/game/bear-market-brute.png"),
   boss: loadImage("../assets/game/boss-v2.png")
 };
 
@@ -40,6 +45,10 @@ let sfxGain = null;
 let musicTimer = 0;
 let musicStep = 0;
 let musicEnabled = localStorage.getItem(MUSIC_KEY) !== "0";
+let gameStartTime = 0;
+let supabaseClient = null;
+let remoteScores = [];
+let remoteScoresReady = false;
 
 const waves = [
   { count: 5, tiers: [0, 0, 1, 0, 1] },
@@ -55,6 +64,13 @@ const tierStats = [
   { hp: 108, speed: 122, damage: 22, score: 520, frame: 3 },
   { hp: 152, speed: 74, damage: 30, score: 820, frame: 4 }
 ];
+
+const bearStats = {
+  hp: 230,
+  speed: 52,
+  damage: 32,
+  score: 960
+};
 
 const itemTypes = [
   { type: "heart", label: "+14 HP", weight: 0.34 },
@@ -76,6 +92,8 @@ function createState() {
     message: "Enter a username",
     shake: 0,
     spawnTimer: 0,
+    bearTimer: 7,
+    bearsInWave: 0,
     spawnedInWave: 0,
     bossSpawned: false,
     popups: [],
@@ -103,6 +121,7 @@ function startGame(name) {
   playerName = name || "player";
   state = createState();
   state.mode = "playing";
+  gameStartTime = performance.now();
   startPanel.querySelector("h1").textContent = "Robinman Alley Fight";
   startPanel.querySelector("p").textContent = "Move with arrows or WASD. Punch with J. Kick with K. Hold Shift or L to defend.";
   startPanel.classList.add("is-hidden");
@@ -131,7 +150,36 @@ function spawnEnemy(tier) {
     defendTimer: 0,
     defendCooldown: 0.6 + Math.random() * 1.4,
     attackAnim: 0,
+    walkCycle: Math.random() * Math.PI * 2,
+    facing: -1,
+    action: "idle",
     kind: "enemy"
+  });
+}
+
+function spawnBear() {
+  state.bearsInWave += 1;
+  state.enemies.push({
+    tier: 6,
+    x: WIDTH + 220,
+    y: GROUND_TOP + 118 + Math.random() * 72,
+    w: 250,
+    h: 324,
+    hp: bearStats.hp,
+    maxHp: bearStats.hp,
+    speed: bearStats.speed,
+    damage: bearStats.damage,
+    score: bearStats.score,
+    frame: 0,
+    hitTimer: 0,
+    attackTimer: 0.8,
+    defendTimer: 0,
+    defendCooldown: 1.8,
+    attackAnim: 0,
+    walkCycle: Math.random() * Math.PI * 2,
+    facing: -1,
+    action: "idle",
+    kind: "bear"
   });
 }
 
@@ -154,6 +202,9 @@ function spawnBoss() {
     defendTimer: 0,
     defendCooldown: 1.1,
     attackAnim: 0,
+    walkCycle: 0,
+    facing: -1,
+    action: "idle",
     kind: "boss"
   });
 }
@@ -235,6 +286,7 @@ function updateWave(dt) {
 
   if (state.wave <= waves.length) {
     const wave = waves[state.wave - 1];
+    const liveBears = state.enemies.filter((enemy) => enemy.kind === "bear").length;
     state.spawnTimer -= dt;
     if (state.spawnedInWave < wave.count && liveRegulars < 4 && state.spawnTimer <= 0) {
       const tier = wave.tiers[state.spawnedInWave % wave.tiers.length];
@@ -242,10 +294,19 @@ function updateWave(dt) {
       state.spawnedInWave += 1;
       state.spawnTimer = 0.75;
     }
+    if (state.wave >= 2 && state.spawnedInWave > 1 && liveBears === 0 && state.bearsInWave < (state.wave >= 4 ? 2 : 1)) {
+      state.bearTimer -= dt;
+      if (state.bearTimer <= 0) {
+        if (Math.random() < 0.58) spawnBear();
+        state.bearTimer = 7 + Math.random() * 6;
+      }
+    }
     if (state.spawnedInWave >= wave.count && state.enemies.length === 0) {
       state.wave += 1;
       state.spawnedInWave = 0;
       state.spawnTimer = 0.8;
+      state.bearTimer = 5 + Math.random() * 5;
+      state.bearsInWave = 0;
       state.score += 250;
       addPopup("+250 WAVE", WIDTH / 2 - 60, 120, "#f3eed9");
       playSfx("wave");
@@ -263,29 +324,46 @@ function updateEnemies(dt) {
     enemy.defendTimer = Math.max(0, enemy.defendTimer - dt);
     enemy.defendCooldown = Math.max(0, enemy.defendCooldown - dt);
     enemy.attackAnim = Math.max(0, enemy.attackAnim - dt);
+    enemy.action = enemy.hitTimer > 0 ? "hit" : "idle";
 
     const player = state.player;
     const distX = player.x + player.w * 0.5 - (enemy.x + enemy.w * 0.5);
     const distY = player.y - enemy.y;
-    const range = enemy.kind === "boss" ? 150 : 108 + enemy.tier * 6;
+    enemy.facing = distX < 0 ? -1 : 1;
+    const range = enemy.kind === "boss" ? 150 : enemy.kind === "bear" ? 172 : 108 + enemy.tier * 6;
     const mayDefend = enemy.defendCooldown <= 0 && Math.abs(distX) < 210 && Math.abs(distY) < 82;
 
-    if (mayDefend && Math.random() < (enemy.kind === "boss" ? 0.025 : 0.012 + enemy.tier * 0.004)) {
-      enemy.defendTimer = enemy.kind === "boss" ? 0.72 : 0.48 + enemy.tier * 0.05;
-      enemy.defendCooldown = enemy.kind === "boss" ? 1.3 : 1.6;
+    if (mayDefend && Math.random() < (enemy.kind === "boss" ? 0.025 : enemy.kind === "bear" ? 0.02 : 0.012 + enemy.tier * 0.004)) {
+      enemy.defendTimer = enemy.kind === "boss" ? 0.72 : enemy.kind === "bear" ? 0.64 : 0.48 + enemy.tier * 0.05;
+      enemy.defendCooldown = enemy.kind === "boss" ? 1.3 : enemy.kind === "bear" ? 1.9 : 1.6;
     }
 
+    let moved = false;
     if (enemy.defendTimer <= 0) {
-      if (Math.abs(distX) > range) enemy.x += Math.sign(distX) * enemy.speed * dt;
-      if (Math.abs(distY) > 8) enemy.y += Math.sign(distY) * enemy.speed * 0.58 * dt;
+      if (Math.abs(distX) > range) {
+        enemy.x += Math.sign(distX) * enemy.speed * dt;
+        moved = true;
+      }
+      if (Math.abs(distY) > 8) {
+        enemy.y += Math.sign(distY) * enemy.speed * 0.58 * dt;
+        moved = true;
+      }
     }
 
     enemy.y = clamp(enemy.y, GROUND_TOP, GROUND_BOTTOM - 56);
 
     if (Math.abs(distX) < range && Math.abs(distY) < 68 && enemy.attackTimer <= 0 && enemy.defendTimer <= 0) {
-      enemy.attackAnim = 0.22;
+      enemy.attackAnim = enemy.kind === "bear" ? 0.34 : 0.22;
+      enemy.action = "attack";
       damagePlayer(enemy.damage, enemy);
-      enemy.attackTimer = enemy.kind === "boss" ? 0.72 : Math.max(0.55, 0.95 - enemy.tier * 0.06);
+      enemy.attackTimer = enemy.kind === "boss" ? 0.72 : enemy.kind === "bear" ? 1.05 : Math.max(0.55, 0.95 - enemy.tier * 0.06);
+    } else if (enemy.defendTimer > 0) {
+      enemy.action = "defend";
+    } else if (moved) {
+      enemy.action = "walk";
+      enemy.walkCycle += dt * (enemy.speed / 18);
+    } else if (enemy.attackAnim > 0) {
+      enemy.action = "attack";
     }
   }
 }
@@ -387,7 +465,7 @@ function scoreKill(enemy) {
 }
 
 function maybeDropItem(enemy) {
-  const chance = enemy.kind === "boss" ? 1 : 0.32;
+  const chance = enemy.kind === "boss" ? 1 : enemy.kind === "bear" ? 0.52 : 0.32;
   if (Math.random() > chance) return;
   const pick = weightedPick(itemTypes);
   state.items.push({
@@ -422,11 +500,14 @@ function endGame(message) {
   running = false;
   state.mode = "done";
   state.message = message;
-  saveScore(message === "Winner");
+  const savedScore = saveScore(message === "Winner");
   renderScores();
+  syncScore(savedScore);
   playSfx(message === "Winner" ? "win" : "gameOver");
   startPanel.querySelector("h1").textContent = message;
-  startPanel.querySelector("p").textContent = "Score saved locally. Enter a username and start again.";
+  startPanel.querySelector("p").textContent = isSupabaseConfigured()
+    ? "Score saved. Enter a username and start again."
+    : "Score saved locally. Add the Supabase anon key to enable global scores.";
   startPanel.classList.remove("is-hidden");
 }
 
@@ -558,17 +639,121 @@ function playNoise(duration, start, volume, destination) {
   source.stop(start + duration + 0.02);
 }
 
+function getSupabaseConfig() {
+  const config = window.ROBIN_FIGHT_SUPABASE || {};
+  return {
+    url: String(config.url || "").trim(),
+    anonKey: String(config.anonKey || "").trim()
+  };
+}
+
+function isSupabaseConfigured() {
+  const config = getSupabaseConfig();
+  return Boolean(config.url && config.anonKey && window.supabase?.createClient);
+}
+
+function getSupabaseClient() {
+  if (supabaseClient) return supabaseClient;
+  if (!isSupabaseConfigured()) return null;
+  const config = getSupabaseConfig();
+  supabaseClient = window.supabase.createClient(config.url, config.anonKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+  return supabaseClient;
+}
+
+function setScoreboardStatus(text) {
+  if (scoreboardStatus) scoreboardStatus.textContent = text;
+}
+
+function setScoreboardTitle(text) {
+  if (scoreboardTitle) scoreboardTitle.textContent = text;
+}
+
+function formatScoreRow(score) {
+  return {
+    name: score.name || score.username || "player",
+    score: Number(score.score) || 0,
+    wave: Number(score.wave) || 1,
+    winner: Boolean(score.winner),
+    date: score.date || score.created_at || new Date().toISOString(),
+    durationSeconds: score.durationSeconds ?? score.duration_seconds ?? null
+  };
+}
+
+async function loadRemoteScores() {
+  const client = getSupabaseClient();
+  if (!client) {
+    remoteScoresReady = false;
+    setScoreboardTitle("Local Winners");
+    setScoreboardStatus("Local scores active");
+    return [];
+  }
+
+  const { data, error } = await client.rpc(LEADERBOARD_RPC);
+
+  if (error) throw error;
+  remoteScores = (data || []).map(formatScoreRow);
+  remoteScoresReady = true;
+  setScoreboardTitle("Global Winners");
+  setScoreboardStatus("Supabase global leaderboard active");
+  return remoteScores;
+}
+
+async function refreshRemoteScores() {
+  try {
+    await loadRemoteScores();
+    renderScores();
+  } catch (error) {
+    remoteScoresReady = false;
+    setScoreboardTitle("Local Winners");
+    setScoreboardStatus(`Supabase unavailable: ${error.message}`);
+    renderScores();
+  }
+}
+
+async function syncScore(score) {
+  const client = getSupabaseClient();
+  if (!client || !score) {
+    setScoreboardStatus("Local scores active");
+    return;
+  }
+
+  setScoreboardStatus("Saving global score...");
+  const { error } = await client.functions
+    .invoke(SUBMIT_SCORE_FUNCTION, {
+      body: {
+        username: score.name,
+        score: score.score,
+        wave: score.wave,
+        winner: score.winner,
+        duration_seconds: score.durationSeconds,
+        user_agent: navigator.userAgent.slice(0, 180)
+      }
+    });
+
+  if (error) {
+    setScoreboardStatus(`Global save failed: ${error.message}`);
+    return;
+  }
+
+  await refreshRemoteScores();
+}
+
 function saveScore(winner) {
   const scores = readScores();
-  scores.push({
-    name: playerName,
+  const score = {
+    name: playerName.trim().replace(/\s+/g, " ").slice(0, 18) || "player",
     score: Math.round(state.score),
     wave: state.wave,
     winner,
+    durationSeconds: Math.max(0, Math.round((performance.now() - gameStartTime) / 1000)),
     date: new Date().toISOString()
-  });
+  };
+  scores.push(score);
   scores.sort((a, b) => b.score - a.score);
   localStorage.setItem(SCORE_KEY, JSON.stringify(scores.slice(0, 10)));
+  return score;
 }
 
 function readScores() {
@@ -580,7 +765,7 @@ function readScores() {
 }
 
 function renderScores() {
-  const scores = readScores();
+  const scores = remoteScoresReady ? remoteScores : readScores().map(formatScoreRow);
   scoreList.innerHTML = "";
   if (scores.length === 0) {
     const empty = document.createElement("li");
@@ -590,7 +775,8 @@ function renderScores() {
   }
   for (const score of scores) {
     const item = document.createElement("li");
-    item.innerHTML = `<strong>${escapeHtml(score.name)}</strong><br>${score.score} pts ${score.winner ? "Winner" : "Wave " + score.wave}`;
+    const duration = score.durationSeconds ? ` · ${score.durationSeconds}s` : "";
+    item.innerHTML = `<strong>${escapeHtml(score.name)}</strong><br>${score.score} pts ${score.winner ? "Winner" : "Wave " + score.wave}${duration}`;
     scoreList.appendChild(item);
   }
 }
@@ -669,18 +855,32 @@ function drawPlayer(player) {
 function drawEnemy(enemy) {
   ctx.save();
   if (enemy.hitTimer > 0) ctx.filter = "brightness(1.8)";
-  const attackLunge = enemy.attackAnim > 0 ? -18 * Math.sin((enemy.attackAnim / 0.22) * Math.PI) : 0;
-  const defendLean = enemy.defendTimer > 0 ? 0.92 : 1;
-  const bob = enemy.defendTimer > 0 ? 0 : Math.sin(performance.now() / (120 - Math.min(enemy.tier, 4) * 8) + enemy.x) * 2.6;
+  const attackDuration = enemy.kind === "bear" ? 0.34 : 0.22;
+  const attackLunge = enemy.attackAnim > 0
+    ? enemy.facing * (enemy.kind === "bear" ? 34 : 22) * Math.sin((enemy.attackAnim / attackDuration) * Math.PI)
+    : 0;
+  const walkStep = enemy.action === "walk" ? Math.sin(enemy.walkCycle) * (enemy.kind === "bear" ? 9 : 6) : 0;
+  const defendScaleX = enemy.action === "defend" ? 0.9 : 1;
+  const defendScaleY = enemy.action === "defend" ? 1.04 : 1;
+  const hitLean = enemy.action === "hit" ? -enemy.facing * 0.055 : 0;
+  const walkLean = enemy.action === "walk" ? Math.sin(enemy.walkCycle) * 0.035 : 0;
+  const attackLean = enemy.action === "attack" ? enemy.facing * 0.075 : 0;
+  const defendLean = enemy.action === "defend" ? -enemy.facing * 0.045 : 0;
+  const rotation = hitLean + walkLean + attackLean + defendLean;
 
   if (enemy.kind === "boss") {
     const img = assets.boss;
     if (img.complete) {
       const dw = enemy.w * 1.6;
       const dh = enemy.h * 1.6;
-      ctx.translate(enemy.x - 92 + attackLunge, enemy.y - dh + 138 + bob);
-      ctx.scale(defendLean, 1);
-      ctx.drawImage(img, 0, 0, img.width, img.height, 0, 0, dw, dh);
+      drawFacingImage(img, 0, 0, img.width, img.height, enemy.x - 92 + attackLunge + walkStep, enemy.y - dh + 138, dw, dh, enemy.facing, defendScaleX, defendScaleY, rotation);
+    }
+  } else if (enemy.kind === "bear") {
+    const img = assets.bear;
+    if (img.complete) {
+      const dw = enemy.w * 1.55;
+      const dh = enemy.h * 1.55;
+      drawFacingImage(img, 0, 0, img.width, img.height, enemy.x - 74 + attackLunge + walkStep, enemy.y - dh + 126, dw, dh, enemy.facing, defendScaleX, defendScaleY, rotation);
     }
   } else {
     const sheet = assets.villains;
@@ -689,14 +889,21 @@ function drawEnemy(enemy) {
       const sh = sheet.height;
       const dw = enemy.w * 1.74;
       const dh = enemy.h * 1.74;
-      ctx.translate(enemy.x - 50 + attackLunge, enemy.y - dh + 110 + bob);
-      ctx.scale(defendLean, 1);
-      ctx.drawImage(sheet, enemy.frame * sw, 0, sw, sh, 0, 0, dw, dh);
+      drawFacingImage(sheet, enemy.frame * sw, 0, sw, sh, enemy.x - 50 + attackLunge + walkStep, enemy.y - dh + 110, dw, dh, enemy.facing, defendScaleX, defendScaleY, rotation);
     }
   }
 
   ctx.restore();
-  if (enemy.defendTimer > 0) drawGuardArc(enemy.x + enemy.w * 0.43, enemy.y - enemy.h * 0.5, "#d7f7b4", 0.22);
+  if (enemy.defendTimer > 0) drawGuardArc(enemy.x + enemy.w * 0.43, enemy.y - enemy.h * 0.5, enemy.kind === "bear" ? "#ff6f66" : "#d7f7b4", 0.22);
+}
+
+function drawFacingImage(img, sx, sy, sw, sh, dx, dy, dw, dh, facing, scaleX = 1, scaleY = 1, rotation = 0) {
+  ctx.save();
+  ctx.translate(dx + dw / 2, dy + dh / 2);
+  ctx.scale(facing === -1 ? -scaleX : scaleX, scaleY);
+  ctx.rotate(rotation);
+  ctx.drawImage(img, sx, sy, sw, sh, -dw / 2, -dh / 2, dw, dh);
+  ctx.restore();
 }
 
 function drawEnemyBars() {
@@ -705,7 +912,7 @@ function drawEnemyBars() {
     const pct = clamp(enemy.hp / enemy.maxHp, 0, 1);
     ctx.fillStyle = "rgba(0, 0, 0, 0.55)";
     ctx.fillRect(box.x, box.y - 16, box.w, 6);
-    ctx.fillStyle = enemy.kind === "boss" ? "#f3eed9" : "#79f1a8";
+    ctx.fillStyle = enemy.kind === "boss" ? "#f3eed9" : enemy.kind === "bear" ? "#ff4d42" : "#79f1a8";
     ctx.fillRect(box.x, box.y - 16, box.w * pct, 6);
     ctx.fillStyle = "rgba(243, 238, 217, 0.82)";
     ctx.font = "700 11px Inter, sans-serif";
@@ -824,6 +1031,15 @@ function updateHud() {
 }
 
 function enemyBox(enemy) {
+  if (enemy.kind === "bear") {
+    return {
+      x: enemy.x + enemy.w * 0.15,
+      y: enemy.y - enemy.h + 56,
+      w: enemy.w * 0.7,
+      h: enemy.h * 0.96
+    };
+  }
+
   return {
     x: enemy.x + enemy.w * 0.12,
     y: enemy.y - enemy.h + 86,
@@ -1064,6 +1280,7 @@ playerForm.addEventListener("submit", (event) => {
 
 resetScores.addEventListener("click", () => {
   localStorage.removeItem(SCORE_KEY);
+  if (!remoteScoresReady) setScoreboardStatus("Local scores cleared");
   renderScores();
 });
 
@@ -1079,6 +1296,7 @@ Promise.all(Object.values(assets).map((img) => new Promise((resolve) => {
 }))).then(() => {
   updateHud();
   renderScores();
+  refreshRemoteScores();
   updateMusicButton();
   draw();
   if (params.get("agent") === "1" || params.get("bot") === "1") {

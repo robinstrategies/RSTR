@@ -87,8 +87,11 @@ const context = {
         this.width = 2525;
         this.height = 606;
       } else if (value.includes("villains")) {
-        this.width = 2230;
-        this.height = 752;
+        this.width = 2163;
+        this.height = 727;
+      } else if (value.includes("bear")) {
+        this.width = 1024;
+        this.height = 1536;
       } else if (value.includes("boss")) {
         this.width = 1210;
         this.height = 1300;
@@ -187,6 +190,7 @@ function createCanvasContext() {
     clearRect: noop,
     translate: noop,
     scale: noop,
+    rotate: noop,
     drawImage: noop,
     fillRect: noop,
     beginPath: noop,

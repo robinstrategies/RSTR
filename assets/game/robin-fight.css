@@ -235,9 +235,16 @@ button {
 }
 
 .scoreboard h2 {
-  margin-bottom: 14px;
+  margin-bottom: 6px;
   font-size: 1.15rem;
   color: var(--green-soft);
+}
+
+.scoreboard-status {
+  margin: 0 0 14px;
+  color: rgba(243, 238, 217, 0.7);
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .scoreboard ol {

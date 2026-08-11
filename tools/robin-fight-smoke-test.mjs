@@ -20,8 +20,10 @@ try {
   await waitFor(`${base}/api/agent/health`);
   await expectOk(`${base}/pages/robin-fight.html`);
   await expectOk(`${base}/assets/game/robin-fight.js`);
+  await expectOk(`${base}/assets/game/robin-fight-config.js`);
   await expectOk(`${base}/assets/game/robinman-player-clean.png`);
-  await expectOk(`${base}/assets/game/villains-sheet-clean.png`);
+  await expectOk(`${base}/assets/game/villains-bear-market.png`);
+  await expectOk(`${base}/assets/game/bear-market-brute.png`);
   await expectOk(`${base}/assets/game/boss-v2.png`);
 
   const decision = await postJson(`${base}/api/agent/decision`, {
@@ -43,7 +45,8 @@ try {
 
   for (const file of [
     "assets/game/robinman-player-clean.png",
-    "assets/game/villains-sheet-clean.png",
+    "assets/game/villains-bear-market.png",
+    "assets/game/bear-market-brute.png",
     "tools/robin-fight-agent-server.mjs"
   ]) {
     if (!existsSync(path.join(root, file))) throw new Error(`Missing expected file: ${file}`);

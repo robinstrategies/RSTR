@@ -42,13 +42,16 @@
 
       <aside class="scoreboard" aria-label="Local scoreboard">
         <div>
-          <h2>Local Winners</h2>
+          <h2 id="scoreboardTitle">Local Winners</h2>
+          <p class="scoreboard-status" id="scoreboardStatus">Local scores active</p>
           <ol id="scoreList"></ol>
         </div>
-        <button id="resetScores" type="button">Clear Scores</button>
+        <button id="resetScores" type="button">Clear Local Scores</button>
       </aside>
     </section>
   </main>
-  <script src="../assets/game/robin-fight.js?v=byte-fighter-audio-v1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../assets/game/robin-fight-config.js?v=bear-market-v1"></script>
+  <script src="../assets/game/robin-fight.js?v=bear-market-v1"></script>
 </body>
 </html>
