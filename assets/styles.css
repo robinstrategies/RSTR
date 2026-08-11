@@ -1,8 +1,8 @@
 :root {
   --bg: #020705;
-  --bg-deep: #04130b;
-  --green: #0e5a2a;
-  --green-bright: #30b566;
+  --bg-deep: #04361d;
+  --green: #04361d;
+  --green-bright: #0f7a43;
   --green-glow: #79f1a8;
   --ivory: #f3eed9;
   --muted: #c7d5c6;
@@ -63,8 +63,8 @@ a {
 
 .city-scene {
   background:
-    radial-gradient(circle at 50% 15%, rgba(121, 241, 168, 0.13), transparent 24%),
-    linear-gradient(180deg, #06180d 0%, #020705 100%);
+    radial-gradient(circle at 50% 15%, rgba(121, 241, 168, 0.12), transparent 24%),
+    linear-gradient(180deg, #04361d 0%, #020705 100%);
 }
 
 .manor-scene {
@@ -295,7 +295,7 @@ h3 {
 }
 
 .hero-title {
-  margin-bottom: 16px;
+  margin: 0;
   font-size: 4.8rem;
   line-height: 0.98;
   text-transform: uppercase;
@@ -304,6 +304,21 @@ h3 {
   margin-inline: auto;
   overflow-wrap: normal;
   white-space: normal;
+}
+
+.hero-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 18px;
+}
+
+.hero-logo {
+  width: clamp(72px, 8vw, 112px);
+  height: clamp(72px, 8vw, 112px);
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .hero-subtitle {
@@ -524,9 +539,17 @@ h3 {
     font-size: 3.3rem;
     line-height: 0.92;
   }
+
+  .hero-title-row {
+    gap: 14px;
+  }
 }
 
 @media (max-width: 560px) {
+  .hero-title-row {
+    flex-direction: column;
+  }
+
   .hero-title {
     font-size: 2.45rem;
   }
