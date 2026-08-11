@@ -69,7 +69,6 @@ a {
     url("robincity-landing.png");
   background-size: cover;
   background-position: center;
-  animation: city-drift 26s ease-in-out infinite alternate;
 }
 
 .manor-scene {
@@ -107,13 +106,7 @@ a {
 }
 
 .city-scene .scene-illustration {
-  background:
-    linear-gradient(90deg, rgba(121, 241, 168, 0.05) 1px, transparent 1px),
-    linear-gradient(rgba(121, 241, 168, 0.035) 1px, transparent 1px);
-  background-size: 52px 52px;
-  mix-blend-mode: screen;
-  opacity: 0.34;
-  animation: matrix-grid-drift 16s linear infinite;
+  display: none;
 }
 
 .city-scene .scene-illustration::before {
@@ -134,45 +127,6 @@ a {
     radial-gradient(circle at 82% 22%, rgba(121, 241, 168, 0.12), transparent 11%),
     linear-gradient(180deg, transparent, rgba(2, 7, 5, 0.52));
   animation: skyline-glow 5.5s ease-in-out infinite;
-}
-
-.matrix-rain,
-.fog-layer,
-.signal-sweep {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.matrix-rain {
-  z-index: 0;
-  opacity: 0.28;
-  mix-blend-mode: screen;
-  background:
-    repeating-linear-gradient(90deg, transparent 0 18px, rgba(121, 241, 168, 0.14) 19px, transparent 20px),
-    repeating-linear-gradient(180deg, transparent 0 22px, rgba(121, 241, 168, 0.06) 23px, transparent 24px);
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.62), transparent 86%);
-  animation: matrix-rain-fall 7s linear infinite;
-}
-
-.fog-layer {
-  z-index: 0;
-  opacity: 0.38;
-  background:
-    linear-gradient(90deg, transparent, rgba(121, 241, 168, 0.09), transparent),
-    radial-gradient(ellipse at 20% 72%, rgba(205, 255, 221, 0.13), transparent 32%),
-    radial-gradient(ellipse at 75% 68%, rgba(121, 241, 168, 0.12), transparent 28%);
-  filter: blur(18px);
-  transform: translateX(-8%);
-  animation: fog-drift 19s ease-in-out infinite alternate;
-}
-
-.signal-sweep {
-  z-index: 0;
-  opacity: 0.24;
-  background: linear-gradient(105deg, transparent 0 42%, rgba(121, 241, 168, 0.12) 48%, transparent 54% 100%);
-  transform: translateX(-80%);
-  animation: signal-sweep 8s ease-in-out infinite;
 }
 
 .manor-scene .scene-illustration::before {
@@ -537,57 +491,12 @@ h3 {
   }
 }
 
-@keyframes city-drift {
-  from {
-    background-position: center center;
-  }
-  to {
-    background-position: 52% 49%;
-  }
-}
-
-@keyframes matrix-grid-drift {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 52px 104px;
-  }
-}
-
 @keyframes matrix-code-fall {
   from {
     background-position: 0 -120px, 0 -240px;
   }
   to {
     background-position: 0 320px, 0 160px;
-  }
-}
-
-@keyframes matrix-rain-fall {
-  from {
-    background-position: 0 -140px, 0 -220px;
-  }
-  to {
-    background-position: 0 320px, 0 180px;
-  }
-}
-
-@keyframes fog-drift {
-  from {
-    transform: translateX(-10%) translateY(0);
-  }
-  to {
-    transform: translateX(10%) translateY(-2%);
-  }
-}
-
-@keyframes signal-sweep {
-  0%, 18% {
-    transform: translateX(-80%);
-  }
-  55%, 100% {
-    transform: translateX(80%);
   }
 }
 
