@@ -63,8 +63,11 @@ a {
 
 .city-scene {
   background:
-    radial-gradient(circle at 50% 15%, rgba(121, 241, 168, 0.13), transparent 24%),
-    linear-gradient(180deg, #06180d 0%, #020705 100%);
+    linear-gradient(90deg, rgba(2, 7, 5, 0.72) 0%, rgba(2, 7, 5, 0.28) 48%, rgba(2, 7, 5, 0.54) 100%),
+    linear-gradient(180deg, rgba(2, 7, 5, 0.08), rgba(2, 7, 5, 0.62)),
+    url("ethereum-crystal-corridor.png");
+  background-size: cover;
+  background-position: center;
 }
 
 .manor-scene {
@@ -103,6 +106,16 @@ a {
 
 .city-scene .scene-illustration {
   display: none;
+}
+
+.crystal-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background: radial-gradient(circle at 50% 46%, rgba(121, 241, 168, 0.42), rgba(48, 181, 102, 0.16) 10%, transparent 24%);
+  mix-blend-mode: screen;
+  animation: crystal-pulse 4.8s ease-in-out infinite;
 }
 
 .city-scene .scene-illustration::before {
@@ -484,6 +497,17 @@ h3 {
   50% {
     transform: scale(1.08);
     opacity: 1;
+  }
+}
+
+@keyframes crystal-pulse {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.03);
   }
 }
 
