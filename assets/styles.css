@@ -119,7 +119,7 @@ a {
     linear-gradient(90deg, rgba(121, 241, 168, 0.12), transparent 18%, rgba(255, 255, 255, 0.06) 28%, transparent 42%),
     repeating-linear-gradient(180deg, transparent 0 6px, rgba(121, 241, 168, 0.08) 7px, transparent 9px);
   mix-blend-mode: screen;
-  animation: landing-glitch 15s steps(1, end) infinite;
+  animation: landing-glitch 7s steps(1, end) infinite;
 }
 
 .city-scene .scene-illustration::before {
