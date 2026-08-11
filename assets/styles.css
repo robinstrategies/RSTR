@@ -295,8 +295,8 @@ a {
 }
 
 .hero-copy {
-  width: min(1280px, calc(100% - 32px));
-  padding: 40px 44px;
+  width: min(1440px, calc(100% - 40px));
+  padding: 42px 48px;
   border: 1px solid var(--line);
   border-radius: 30px;
   background: linear-gradient(180deg, rgba(4, 19, 11, 0.68), rgba(3, 11, 8, 0.86));
@@ -323,13 +323,13 @@ h3 {
 
 .hero-title {
   margin-bottom: 16px;
-  font-size: clamp(3rem, 7vw, 6.25rem);
-  line-height: 0.95;
+  font-size: clamp(2.6rem, 5.6vw, 5.4rem);
+  line-height: 0.98;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
   max-width: 100%;
   margin-inline: auto;
-  text-wrap: balance;
+  white-space: nowrap;
 }
 
 .hero-subtitle {
@@ -531,5 +531,6 @@ h3 {
   .hero-title {
     font-size: clamp(2.7rem, 16vw, 4.8rem);
     line-height: 0.92;
+    white-space: normal;
   }
 }
