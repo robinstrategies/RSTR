@@ -18,8 +18,8 @@ const SCORE_KEY = "robinman-alley-fight-scores";
 
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
-  robinman: loadImage("../assets/game/robinman-player-v2.png"),
-  villains: loadImage("../assets/game/villains-sheet-v2.png"),
+  robinman: loadImage("../assets/game/robinman-player-clean.png"),
+  villains: loadImage("../assets/game/villains-sheet-clean.png"),
   boss: loadImage("../assets/game/boss-v2.png")
 };
 
