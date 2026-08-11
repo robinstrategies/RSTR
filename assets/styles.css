@@ -63,11 +63,8 @@ a {
 
 .city-scene {
   background:
-    linear-gradient(90deg, rgba(2, 7, 5, 0.34) 0%, rgba(2, 7, 5, 0.08) 48%, rgba(2, 7, 5, 0.24) 100%),
-    linear-gradient(180deg, rgba(2, 7, 5, 0.02), rgba(2, 7, 5, 0.2)),
-    url("ethereum-crystal-corridor.png");
-  background-size: cover;
-  background-position: center;
+    radial-gradient(circle at 50% 15%, rgba(121, 241, 168, 0.13), transparent 24%),
+    linear-gradient(180deg, #06180d 0%, #020705 100%);
 }
 
 .manor-scene {
@@ -106,50 +103,6 @@ a {
 
 .city-scene .scene-illustration {
   display: none;
-}
-
-.crystal-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
-  background:
-    radial-gradient(ellipse at 50% 63%, rgba(121, 241, 168, 0.58), rgba(48, 181, 102, 0.28) 18%, transparent 42%),
-    radial-gradient(ellipse at 50% 44%, rgba(235, 255, 236, 0.34), rgba(121, 241, 168, 0.18) 16%, transparent 38%);
-  mix-blend-mode: screen;
-  animation: crystal-pulse 4.8s ease-in-out infinite;
-}
-
-.crystal-glow::before,
-.crystal-glow::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: 45%;
-  pointer-events: none;
-  mix-blend-mode: screen;
-}
-
-.crystal-glow::before {
-  width: 340px;
-  height: 540px;
-  background: linear-gradient(180deg, rgba(235, 255, 236, 0.72), rgba(121, 241, 168, 0.5) 48%, rgba(35, 217, 104, 0.32));
-  clip-path: polygon(50% 0, 100% 34%, 50% 50%, 0 34%, 50% 0, 50% 50%, 100% 66%, 50% 100%, 0 66%, 50% 50%);
-  filter: blur(18px) drop-shadow(0 0 90px rgba(121, 241, 168, 0.95));
-  opacity: 0.5;
-  transform: translate(-50%, -50%);
-  animation: crystal-core-glow 3.2s ease-in-out infinite;
-}
-
-.crystal-glow::after {
-  width: 840px;
-  height: 620px;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(121, 241, 168, 0.52), rgba(48, 181, 102, 0.22) 34%, transparent 72%);
-  filter: blur(28px);
-  opacity: 0.48;
-  transform: translate(-50%, -38%);
-  animation: crystal-halo-breathe 4.8s ease-in-out infinite;
 }
 
 .city-scene .scene-illustration::before {
@@ -531,39 +484,6 @@ h3 {
   50% {
     transform: scale(1.08);
     opacity: 1;
-  }
-}
-
-@keyframes crystal-pulse {
-  0%, 100% {
-    opacity: 0.42;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.74;
-    transform: scale(1.03);
-  }
-}
-
-@keyframes crystal-core-glow {
-  0%, 100% {
-    opacity: 0.3;
-    transform: translate(-50%, -50%) scale(0.96);
-  }
-  50% {
-    opacity: 0.72;
-    transform: translate(-50%, -50%) scale(1.04);
-  }
-}
-
-@keyframes crystal-halo-breathe {
-  0%, 100% {
-    opacity: 0.3;
-    transform: translate(-50%, -38%) scale(0.92);
-  }
-  50% {
-    opacity: 0.78;
-    transform: translate(-50%, -38%) scale(1.1);
   }
 }
 
