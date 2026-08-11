@@ -69,23 +69,20 @@ a {
 
 .manor-scene {
   background:
-    radial-gradient(circle at 50% 18%, rgba(121, 241, 168, 0.16), transparent 14%),
-    linear-gradient(180deg, rgba(3, 16, 8, 0.72), rgba(2, 7, 5, 0.94)),
-    linear-gradient(180deg, #0b2114 0%, #020705 78%);
+    radial-gradient(circle at 50% 18%, rgba(121, 241, 168, 0.12), transparent 22%),
+    linear-gradient(180deg, #04361d 0%, #020705 100%);
 }
 
 .tracker-scene {
   background:
-    radial-gradient(circle at 50% 18%, rgba(121, 241, 168, 0.18), transparent 16%),
-    linear-gradient(180deg, rgba(3, 16, 8, 0.66), rgba(2, 7, 5, 0.94)),
-    linear-gradient(180deg, #0a2618 0%, #020705 78%);
+    radial-gradient(circle at 50% 18%, rgba(121, 241, 168, 0.12), transparent 22%),
+    linear-gradient(180deg, #04361d 0%, #020705 100%);
 }
 
 .bureau-scene {
   background:
-    radial-gradient(circle at 60% 16%, rgba(121, 241, 168, 0.16), transparent 16%),
-    linear-gradient(180deg, rgba(3, 16, 8, 0.72), rgba(2, 7, 5, 0.95)),
-    linear-gradient(180deg, #122417 0%, #020705 80%);
+    radial-gradient(circle at 50% 18%, rgba(121, 241, 168, 0.12), transparent 22%),
+    linear-gradient(180deg, #04361d 0%, #020705 100%);
 }
 
 .scene-illustration {
