@@ -317,7 +317,8 @@ h3 {
 .hero-logo {
   width: clamp(72px, 8vw, 112px);
   height: clamp(72px, 8vw, 112px);
-  object-fit: contain;
+  border-radius: 50%;
+  object-fit: cover;
   flex: 0 0 auto;
 }
 
