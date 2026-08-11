@@ -365,15 +365,17 @@ h3 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 88px);
 }
 
 .page-hero {
-  width: min(780px, 100%);
-  margin-bottom: 24px;
-  padding: 28px 30px;
+  width: min(940px, 100%);
+  margin-bottom: 0;
+  padding: 34px;
   border: 1px solid var(--line);
-  border-radius: 28px;
-  background: linear-gradient(180deg, rgba(4, 19, 11, 0.7), rgba(3, 11, 8, 0.88));
+  border-radius: 30px 30px 0 0;
+  background: linear-gradient(180deg, rgba(4, 19, 11, 0.68), rgba(3, 11, 8, 0.86));
   box-shadow: 0 24px 80px var(--shadow);
   backdrop-filter: blur(8px);
   text-align: center;
@@ -393,11 +395,12 @@ h3 {
 }
 
 .content-card {
-  width: min(880px, 100%);
-  padding: 30px;
+  width: min(940px, 100%);
+  padding: 0 34px 34px;
   border: 1px solid var(--line);
-  border-radius: 26px;
-  background: linear-gradient(180deg, rgba(4, 19, 11, 0.76), rgba(3, 11, 8, 0.92));
+  border-top: 0;
+  border-radius: 0 0 30px 30px;
+  background: linear-gradient(180deg, rgba(4, 19, 11, 0.86), rgba(3, 11, 8, 0.92));
   box-shadow: 0 24px 80px var(--shadow);
   backdrop-filter: blur(8px);
   text-align: center;
