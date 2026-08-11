@@ -47,4 +47,5 @@ Test commands:
 ```powershell
 node tools/robin-fight-smoke-test.mjs
 node tools/robin-fight-headless-test.mjs
+node tools/robin-fight-marathon.mjs 80 9000
 ```

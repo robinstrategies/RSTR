@@ -40,17 +40,17 @@ const waves = [
 ];
 
 const tierStats = [
-  { hp: 32, speed: 92, damage: 7, score: 120, frame: 0 },
-  { hp: 54, speed: 82, damage: 10, score: 210, frame: 1 },
-  { hp: 82, speed: 66, damage: 14, score: 330, frame: 2 },
-  { hp: 108, speed: 122, damage: 18, score: 520, frame: 3 },
-  { hp: 152, speed: 74, damage: 24, score: 820, frame: 4 }
+  { hp: 32, speed: 92, damage: 8, score: 120, frame: 0 },
+  { hp: 54, speed: 82, damage: 12, score: 210, frame: 1 },
+  { hp: 82, speed: 66, damage: 17, score: 330, frame: 2 },
+  { hp: 108, speed: 122, damage: 22, score: 520, frame: 3 },
+  { hp: 152, speed: 74, damage: 30, score: 820, frame: 4 }
 ];
 
 const itemTypes = [
-  { type: "heart", label: "+20 HP", weight: 0.5 },
-  { type: "immunity", label: "IMMUNE", weight: 0.28 },
-  { type: "bomb", label: "-18 HP", weight: 0.22 }
+  { type: "heart", label: "+14 HP", weight: 0.34 },
+  { type: "immunity", label: "IMMUNE", weight: 0.16 },
+  { type: "bomb", label: "-22 HP", weight: 0.5 }
 ];
 
 function loadImage(src) {
@@ -136,7 +136,7 @@ function spawnBoss() {
     hp: 520,
     maxHp: 520,
     speed: 58,
-    damage: 28,
+    damage: 36,
     score: 1800,
     frame: 0,
     hitTimer: 0,
@@ -256,7 +256,7 @@ function updateEnemies(dt) {
     const player = state.player;
     const distX = player.x + player.w * 0.5 - (enemy.x + enemy.w * 0.5);
     const distY = player.y - enemy.y;
-    const range = enemy.kind === "boss" ? 130 : 84 + enemy.tier * 4;
+    const range = enemy.kind === "boss" ? 150 : 108 + enemy.tier * 6;
     const mayDefend = enemy.defendCooldown <= 0 && Math.abs(distX) < 210 && Math.abs(distY) < 82;
 
     if (mayDefend && Math.random() < (enemy.kind === "boss" ? 0.025 : 0.012 + enemy.tier * 0.004)) {
@@ -271,10 +271,10 @@ function updateEnemies(dt) {
 
     enemy.y = clamp(enemy.y, GROUND_TOP, GROUND_BOTTOM - 56);
 
-    if (Math.abs(distX) < range && Math.abs(distY) < 62 && enemy.attackTimer <= 0 && enemy.defendTimer <= 0) {
+    if (Math.abs(distX) < range && Math.abs(distY) < 68 && enemy.attackTimer <= 0 && enemy.defendTimer <= 0) {
       enemy.attackAnim = 0.22;
       damagePlayer(enemy.damage, enemy);
-      enemy.attackTimer = enemy.kind === "boss" ? 0.86 : Math.max(0.64, 1.12 - enemy.tier * 0.07);
+      enemy.attackTimer = enemy.kind === "boss" ? 0.72 : Math.max(0.55, 0.95 - enemy.tier * 0.06);
     }
   }
 }
@@ -370,7 +370,7 @@ function scoreKill(enemy) {
 }
 
 function maybeDropItem(enemy) {
-  const chance = enemy.kind === "boss" ? 1 : 0.48;
+  const chance = enemy.kind === "boss" ? 1 : 0.32;
   if (Math.random() > chance) return;
   const pick = weightedPick(itemTypes);
   state.items.push({
@@ -387,13 +387,13 @@ function maybeDropItem(enemy) {
 function collectItem(item) {
   item.collected = true;
   if (item.type === "heart") {
-    state.player.hp = Math.min(state.player.maxHp, state.player.hp + 20);
-    addPopup("+20 HP", item.x - 16, item.y - 32, "#ff6f91");
+    state.player.hp = Math.min(state.player.maxHp, state.player.hp + 14);
+    addPopup("+14 HP", item.x - 16, item.y - 32, "#ff6f91");
   } else if (item.type === "immunity") {
-    state.player.immuneTimer = 6;
+    state.player.immuneTimer = 3.5;
     addPopup("IMMUNE", item.x - 22, item.y - 32, "#f3eed9");
   } else {
-    damagePlayer(18);
+    damagePlayer(22);
     addPopup("BOMB", item.x - 10, item.y - 32, "#ffcf5f");
   }
 }
@@ -727,6 +727,7 @@ function escapeHtml(value) {
 function getSnapshot() {
   return {
     mode: state.mode,
+    message: state.message,
     score: Math.round(state.score),
     wave: state.wave,
     bossSpawned: state.bossSpawned,
