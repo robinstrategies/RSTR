@@ -1,0 +1,260 @@
+:root {
+  --bg: #020705;
+  --panel: rgba(2, 10, 6, 0.76);
+  --panel-strong: rgba(2, 7, 5, 0.94);
+  --green: #35c96c;
+  --green-soft: #79f1a8;
+  --cream: #f3eed9;
+  --muted: #b8cab8;
+  --line: rgba(121, 241, 168, 0.24);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at 50% 8%, rgba(53, 201, 108, 0.15), transparent 34%), var(--bg);
+  color: var(--cream);
+  font-family: "Inter", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.game-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.game-stage {
+  width: min(1500px, 100%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+}
+
+.game-topbar {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+}
+
+.brand-link {
+  color: var(--cream);
+  font-family: "Cinzel", serif;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.hud {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hud span,
+.scoreboard,
+.start-panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(10px);
+}
+
+.hud span {
+  min-width: 104px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  text-align: center;
+  color: var(--green-soft);
+  font-weight: 700;
+}
+
+.canvas-wrap {
+  position: relative;
+  min-width: 0;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #010604;
+  box-shadow: 0 24px 90px rgba(0, 0, 0, 0.64);
+}
+
+#gameCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.start-panel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(460px, calc(100% - 32px));
+  transform: translate(-50%, -50%);
+  padding: 26px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.start-panel.is-hidden {
+  display: none;
+}
+
+.start-panel h1,
+.scoreboard h2 {
+  margin: 0;
+  font-family: "Cinzel", serif;
+  text-transform: uppercase;
+}
+
+.start-panel h1 {
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 0.92;
+}
+
+.start-panel form {
+  margin-top: 20px;
+}
+
+.start-panel label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--green-soft);
+  font-size: 0.82rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.start-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.start-row input,
+.start-row button,
+.scoreboard button {
+  min-height: 46px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+.start-row input {
+  width: 100%;
+  padding: 0 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: var(--cream);
+  outline: 0;
+}
+
+.start-row input:focus {
+  border-color: rgba(121, 241, 168, 0.58);
+}
+
+.start-row button,
+.scoreboard button {
+  padding: 0 18px;
+  background: linear-gradient(135deg, #12602f, #35c96c);
+  color: var(--cream);
+  font-weight: 800;
+}
+
+.start-panel p {
+  margin: 16px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.scoreboard {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px;
+  border-radius: 8px;
+}
+
+.scoreboard h2 {
+  margin-bottom: 14px;
+  font-size: 1.15rem;
+  color: var(--green-soft);
+}
+
+.scoreboard ol {
+  margin: 0;
+  padding-left: 24px;
+}
+
+.scoreboard li {
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.scoreboard strong {
+  color: var(--cream);
+}
+
+.scoreboard button {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+@media (max-width: 1020px) {
+  .game-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .scoreboard {
+    min-height: 180px;
+  }
+}
+
+@media (max-width: 640px) {
+  .game-shell {
+    padding: 10px;
+  }
+
+  .game-topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .hud {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .hud span {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .start-row {
+    grid-template-columns: 1fr;
+  }
+}
