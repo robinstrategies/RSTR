@@ -25,8 +25,8 @@ const SUBMIT_SCORE_FUNCTION = "submit-robin-score";
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
   robinman: loadImage("../assets/game/robinman-player-clean.png"),
-  villains: loadImage("../assets/game/villains-bear-market.png"),
-  bear: loadImage("../assets/game/bear-market-brute.png"),
+  villains: loadImage("../assets/game/villains-bear-market.png?v=opacity-facing-fix"),
+  bear: loadImage("../assets/game/bear-market-brute.png?v=opacity-facing-fix"),
   boss: loadImage("../assets/game/boss-v2.png")
 };
 
@@ -855,6 +855,7 @@ function drawPlayer(player) {
 function drawEnemy(enemy) {
   ctx.save();
   if (enemy.hitTimer > 0) ctx.filter = "brightness(1.8)";
+  const spriteFacing = enemy.kind === "boss" ? enemy.facing : -enemy.facing;
   const attackDuration = enemy.kind === "bear" ? 0.34 : 0.22;
   const attackLunge = enemy.attackAnim > 0
     ? enemy.facing * (enemy.kind === "bear" ? 34 : 22) * Math.sin((enemy.attackAnim / attackDuration) * Math.PI)
@@ -873,14 +874,14 @@ function drawEnemy(enemy) {
     if (img.complete) {
       const dw = enemy.w * 1.6;
       const dh = enemy.h * 1.6;
-      drawFacingImage(img, 0, 0, img.width, img.height, enemy.x - 92 + attackLunge + walkStep, enemy.y - dh + 138, dw, dh, enemy.facing, defendScaleX, defendScaleY, rotation);
+      drawFacingImage(img, 0, 0, img.width, img.height, enemy.x - 92 + attackLunge + walkStep, enemy.y - dh + 138, dw, dh, spriteFacing, defendScaleX, defendScaleY, rotation);
     }
   } else if (enemy.kind === "bear") {
     const img = assets.bear;
     if (img.complete) {
       const dw = enemy.w * 1.55;
       const dh = enemy.h * 1.55;
-      drawFacingImage(img, 0, 0, img.width, img.height, enemy.x - 74 + attackLunge + walkStep, enemy.y - dh + 126, dw, dh, enemy.facing, defendScaleX, defendScaleY, rotation);
+      drawFacingImage(img, 0, 0, img.width, img.height, enemy.x - 74 + attackLunge + walkStep, enemy.y - dh + 126, dw, dh, spriteFacing, defendScaleX, defendScaleY, rotation);
     }
   } else {
     const sheet = assets.villains;
@@ -889,7 +890,7 @@ function drawEnemy(enemy) {
       const sh = sheet.height;
       const dw = enemy.w * 1.74;
       const dh = enemy.h * 1.74;
-      drawFacingImage(sheet, enemy.frame * sw, 0, sw, sh, enemy.x - 50 + attackLunge + walkStep, enemy.y - dh + 110, dw, dh, enemy.facing, defendScaleX, defendScaleY, rotation);
+      drawFacingImage(sheet, enemy.frame * sw, 0, sw, sh, enemy.x - 50 + attackLunge + walkStep, enemy.y - dh + 110, dw, dh, spriteFacing, defendScaleX, defendScaleY, rotation);
     }
   }
 
