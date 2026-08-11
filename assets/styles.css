@@ -58,13 +58,13 @@ a {
 }
 
 .scene-page::after {
-  background: radial-gradient(circle at center, transparent 55%, rgba(0, 0, 0, 0.5) 100%);
+  background: radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.24) 100%);
 }
 
 .city-scene {
   background:
-    linear-gradient(90deg, rgba(2, 7, 5, 0.72) 0%, rgba(2, 7, 5, 0.28) 48%, rgba(2, 7, 5, 0.54) 100%),
-    linear-gradient(180deg, rgba(2, 7, 5, 0.08), rgba(2, 7, 5, 0.62)),
+    linear-gradient(90deg, rgba(2, 7, 5, 0.34) 0%, rgba(2, 7, 5, 0.08) 48%, rgba(2, 7, 5, 0.24) 100%),
+    linear-gradient(180deg, rgba(2, 7, 5, 0.02), rgba(2, 7, 5, 0.2)),
     url("ethereum-crystal-corridor.png");
   background-size: cover;
   background-position: center;
@@ -285,7 +285,7 @@ a {
   padding: 42px 48px;
   border: 1px solid var(--line);
   border-radius: 30px;
-  background: linear-gradient(180deg, rgba(4, 19, 11, 0.68), rgba(3, 11, 8, 0.86));
+  background: linear-gradient(180deg, rgba(4, 19, 11, 0.54), rgba(3, 11, 8, 0.66));
   box-shadow: 0 24px 80px var(--shadow);
   backdrop-filter: blur(8px);
   animation: fade-up 900ms ease;
