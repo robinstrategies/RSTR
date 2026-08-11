@@ -24,6 +24,8 @@ Game URL:
 http://127.0.0.1:5174/pages/robin-fight.html
 ```
 
+Music is generated in-browser with Web Audio. It defaults on and starts after the player presses Start; use the Music toggle in the HUD to mute or resume it.
+
 Local agent API server:
 
 ```powershell

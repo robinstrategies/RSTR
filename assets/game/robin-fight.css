@@ -74,6 +74,7 @@ button {
 }
 
 .hud > span,
+.music-toggle,
 .scoreboard,
 .start-panel {
   border: 1px solid var(--line);
@@ -82,13 +83,24 @@ button {
   backdrop-filter: blur(10px);
 }
 
-.hud > span {
+.hud > span,
+.music-toggle {
   min-width: 104px;
   padding: 10px 12px;
   border-radius: 8px;
   text-align: center;
   color: var(--green-soft);
   font-weight: 700;
+}
+
+.music-toggle {
+  min-height: 44px;
+  color: var(--cream);
+}
+
+.music-toggle[aria-pressed="true"] {
+  color: #04130b;
+  background: linear-gradient(135deg, #79f1a8, #35c96c);
 }
 
 .health-meter {
@@ -273,7 +285,8 @@ button {
     justify-content: stretch;
   }
 
-  .hud > span {
+  .hud > span,
+  .music-toggle {
     flex: 1;
     min-width: 0;
   }

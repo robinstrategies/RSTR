@@ -184,6 +184,7 @@ function element(elements, id) {
       innerHTML: "",
       style: {},
       classList: { add() {}, remove() {} },
+      setAttribute() {},
       addEventListener() {},
       appendChild() {},
       querySelector(selector) {

@@ -9,12 +9,14 @@ const playerForm = document.getElementById("playerForm");
 const playerNameInput = document.getElementById("playerName");
 const scoreList = document.getElementById("scoreList");
 const resetScores = document.getElementById("resetScores");
+const musicToggle = document.getElementById("musicToggle");
 
 const WIDTH = canvas.width;
 const HEIGHT = canvas.height;
 const GROUND_TOP = 420;
 const GROUND_BOTTOM = 646;
 const SCORE_KEY = "robinman-alley-fight-scores";
+const MUSIC_KEY = "robinman-byte-fighter-music";
 
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
@@ -31,6 +33,13 @@ let lastTime = 0;
 let running = false;
 let agentTimer = 0;
 let agentTick = 0;
+let audioContext = null;
+let masterGain = null;
+let musicGain = null;
+let sfxGain = null;
+let musicTimer = 0;
+let musicStep = 0;
+let musicEnabled = localStorage.getItem(MUSIC_KEY) !== "0";
 
 const waves = [
   { count: 5, tiers: [0, 0, 1, 0, 1] },
@@ -100,6 +109,7 @@ function startGame(name) {
   running = true;
   lastTime = performance.now();
   requestAnimationFrame(loop);
+  if (musicEnabled) startMusic();
 }
 
 function spawnEnemy(tier) {
@@ -238,6 +248,7 @@ function updateWave(dt) {
       state.spawnTimer = 0.8;
       state.score += 250;
       addPopup("+250 WAVE", WIDTH / 2 - 60, 120, "#f3eed9");
+      playSfx("wave");
     }
     return;
   }
@@ -333,11 +344,15 @@ function playerAttack(kind) {
       state.score += enemy.hp <= 0 ? 0 : blocked ? 6 : 18;
       state.shake = Math.max(state.shake, blocked ? 2 : isKick ? 5 : 3);
       addPopup(blocked ? "BLOCK" : `-${dealt}`, enemy.x, enemy.y - enemy.h + 70, blocked ? "#d7f7b4" : "#79f1a8");
+      playSfx(blocked ? "block" : isKick ? "kick" : "punch");
       landed = true;
     }
   }
 
-  if (!landed) state.score = Math.max(0, state.score - 2);
+  if (!landed) {
+    state.score = Math.max(0, state.score - 2);
+    playSfx("miss");
+  }
 }
 
 function damagePlayer(amount, enemy) {
@@ -355,6 +370,7 @@ function damagePlayer(amount, enemy) {
   player.invuln = blocked ? 0.22 : 0.45;
   state.shake = blocked ? 3 : 8;
   addPopup(blocked ? "GUARD" : `-${damage} HP`, player.x + 10, player.y - 158, blocked ? "#d7f7b4" : "#f3eed9");
+  playSfx(blocked ? "guard" : "hurt");
 
   if (blocked && enemy) {
     enemy.x += Math.sign(enemy.x - player.x) * 16;
@@ -366,6 +382,7 @@ function scoreKill(enemy) {
   enemy.counted = true;
   state.score += enemy.score;
   addPopup(`+${enemy.score}`, enemy.x + 8, enemy.y - enemy.h + 58, "#f3eed9");
+  playSfx(enemy.kind === "boss" ? "bossDown" : "ko");
   maybeDropItem(enemy);
 }
 
@@ -389,12 +406,15 @@ function collectItem(item) {
   if (item.type === "heart") {
     state.player.hp = Math.min(state.player.maxHp, state.player.hp + 14);
     addPopup("+14 HP", item.x - 16, item.y - 32, "#ff6f91");
+    playSfx("heart");
   } else if (item.type === "immunity") {
     state.player.immuneTimer = 3.5;
     addPopup("IMMUNE", item.x - 22, item.y - 32, "#f3eed9");
+    playSfx("immunity");
   } else {
     damagePlayer(22);
     addPopup("BOMB", item.x - 10, item.y - 32, "#ffcf5f");
+    playSfx("bomb");
   }
 }
 
@@ -404,9 +424,138 @@ function endGame(message) {
   state.message = message;
   saveScore(message === "Winner");
   renderScores();
+  playSfx(message === "Winner" ? "win" : "gameOver");
   startPanel.querySelector("h1").textContent = message;
   startPanel.querySelector("p").textContent = "Score saved locally. Enter a username and start again.";
   startPanel.classList.remove("is-hidden");
+}
+
+function updateMusicButton() {
+  if (!musicToggle) return;
+  musicToggle.textContent = musicEnabled ? "Music On" : "Music Off";
+  musicToggle.setAttribute("aria-pressed", String(musicEnabled));
+}
+
+function setupAudio() {
+  if (audioContext || !window.AudioContext && !window.webkitAudioContext) return Boolean(audioContext);
+  const AudioCtor = window.AudioContext || window.webkitAudioContext;
+  audioContext = new AudioCtor();
+  masterGain = audioContext.createGain();
+  musicGain = audioContext.createGain();
+  sfxGain = audioContext.createGain();
+  masterGain.gain.value = 0.42;
+  musicGain.gain.value = 0.2;
+  sfxGain.gain.value = 0.34;
+  musicGain.connect(masterGain);
+  sfxGain.connect(masterGain);
+  masterGain.connect(audioContext.destination);
+  return true;
+}
+
+function setMusicEnabled(enabled) {
+  musicEnabled = enabled;
+  localStorage.setItem(MUSIC_KEY, enabled ? "1" : "0");
+  updateMusicButton();
+  if (enabled) startMusic();
+  else stopMusic();
+}
+
+function startMusic() {
+  if (!setupAudio()) return;
+  audioContext.resume();
+  if (musicTimer) return;
+  scheduleMusicStep();
+  musicTimer = window.setInterval(scheduleMusicStep, 125);
+}
+
+function stopMusic() {
+  window.clearInterval(musicTimer);
+  musicTimer = 0;
+  musicStep = 0;
+}
+
+function scheduleMusicStep() {
+  if (!audioContext || !musicGain) return;
+  const t = audioContext.currentTime + 0.02;
+  const step = musicStep % 32;
+  const bass = [55, 55, 82.41, 55, 73.42, 55, 98, 82.41];
+  const lead = [220, 0, 261.63, 0, 293.66, 329.63, 293.66, 261.63, 220, 0, 196, 0, 220, 246.94, 261.63, 329.63];
+
+  if (step % 2 === 0) {
+    playTone(bass[(step / 2) % bass.length], 0.08, t, "square", 0.16, musicGain);
+  }
+  if (step % 4 !== 1) {
+    const note = lead[step % lead.length];
+    if (note) playTone(note, 0.055, t, "square", 0.07, musicGain);
+  }
+  if (step % 4 === 0) playNoise(0.04, t, 0.1, musicGain);
+  if (step % 8 === 4) playNoise(0.07, t, 0.055, musicGain);
+  if (step % 16 === 15) playTone(880, 0.035, t, "triangle", 0.05, musicGain);
+  musicStep += 1;
+}
+
+function playSfx(type) {
+  if (!musicEnabled || !setupAudio()) return;
+  audioContext.resume();
+  const t = audioContext.currentTime + 0.01;
+  const sounds = {
+    punch: () => playTone(185, 0.045, t, "square", 0.22, sfxGain, 95),
+    kick: () => playTone(132, 0.07, t, "sawtooth", 0.24, sfxGain, 72),
+    miss: () => playTone(110, 0.035, t, "triangle", 0.08, sfxGain, 72),
+    block: () => playTone(440, 0.04, t, "square", 0.16, sfxGain, 250),
+    guard: () => playTone(392, 0.055, t, "triangle", 0.12, sfxGain, 196),
+    hurt: () => playTone(90, 0.1, t, "sawtooth", 0.22, sfxGain, 50),
+    ko: () => arpeggio([330, 392, 523.25], t, 0.055, 0.13),
+    bossDown: () => arpeggio([523.25, 392, 330, 261.63], t, 0.08, 0.18),
+    wave: () => arpeggio([261.63, 329.63, 392, 523.25], t, 0.055, 0.12),
+    heart: () => arpeggio([523.25, 659.25], t, 0.05, 0.1),
+    immunity: () => arpeggio([659.25, 783.99, 987.77], t, 0.045, 0.1),
+    bomb: () => playNoise(0.16, t, 0.28, sfxGain),
+    win: () => arpeggio([392, 523.25, 659.25, 783.99, 1046.5], t, 0.08, 0.16),
+    gameOver: () => arpeggio([220, 196, 164.81, 130.81], t, 0.11, 0.18)
+  };
+  if (sounds[type]) sounds[type]();
+}
+
+function arpeggio(notes, start, duration, volume) {
+  notes.forEach((note, index) => {
+    playTone(note, duration, start + index * duration * 0.82, "square", volume, sfxGain);
+  });
+}
+
+function playTone(frequency, duration, start, type, volume, destination, endFrequency) {
+  if (!audioContext || !destination) return;
+  const osc = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  osc.type = type;
+  osc.frequency.setValueAtTime(frequency, start);
+  if (endFrequency) osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFrequency), start + duration);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  osc.connect(gain);
+  gain.connect(destination);
+  osc.start(start);
+  osc.stop(start + duration + 0.02);
+}
+
+function playNoise(duration, start, volume, destination) {
+  if (!audioContext || !destination) return;
+  const bufferSize = Math.max(1, Math.floor(audioContext.sampleRate * duration));
+  const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i += 1) {
+    data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+  }
+  const source = audioContext.createBufferSource();
+  const gain = audioContext.createGain();
+  source.buffer = buffer;
+  gain.gain.setValueAtTime(volume, start);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+  source.connect(gain);
+  gain.connect(destination);
+  source.start(start);
+  source.stop(start + duration + 0.02);
 }
 
 function saveScore(winner) {
@@ -918,12 +1067,19 @@ resetScores.addEventListener("click", () => {
   renderScores();
 });
 
+if (musicToggle) {
+  musicToggle.addEventListener("click", () => {
+    setMusicEnabled(!musicEnabled);
+  });
+}
+
 Promise.all(Object.values(assets).map((img) => new Promise((resolve) => {
   if (img.complete) resolve();
   else img.addEventListener("load", resolve, { once: true });
 }))).then(() => {
   updateHud();
   renderScores();
+  updateMusicButton();
   draw();
   if (params.get("agent") === "1" || params.get("bot") === "1") {
     playerNameInput.value = params.get("name") || "Agent";
