@@ -17,7 +17,10 @@
         <div class="hud" aria-live="polite">
           <span id="scoreText">Score 0</span>
           <span id="waveText">Wave 1</span>
-          <span id="healthText">HP 100</span>
+          <span class="health-meter" aria-label="Hero health">
+            <span id="healthText">HP 100</span>
+            <span class="health-track"><span id="healthFill"></span></span>
+          </span>
         </div>
       </div>
 
@@ -32,7 +35,7 @@
               <button type="submit">Start</button>
             </div>
           </form>
-          <p>Move with arrows or WASD. Punch with J. Kick with K.</p>
+          <p>Move with arrows or WASD. Punch with J. Kick with K. Hold Shift or L to defend.</p>
         </div>
       </div>
 
