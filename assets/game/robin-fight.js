@@ -24,10 +24,13 @@ const assets = {
 };
 
 const keys = new Set();
+const params = new URLSearchParams(window.location.search);
 let playerName = "player";
 let state = createState();
 let lastTime = 0;
 let running = false;
+let agentTimer = 0;
+let agentTick = 0;
 
 const waves = [
   { count: 5, tiers: [0, 0, 1, 0, 1] },
@@ -91,6 +94,8 @@ function startGame(name) {
   playerName = name || "player";
   state = createState();
   state.mode = "playing";
+  startPanel.querySelector("h1").textContent = "Robinman Alley Fight";
+  startPanel.querySelector("p").textContent = "Move with arrows or WASD. Punch with J. Kick with K. Hold Shift or L to defend.";
   startPanel.classList.add("is-hidden");
   running = true;
   lastTime = performance.now();
@@ -371,7 +376,7 @@ function maybeDropItem(enemy) {
   state.items.push({
     type: pick.type,
     label: pick.label,
-    x: enemy.x + enemy.w * 0.35,
+    x: clamp(enemy.x + enemy.w * 0.35, 40, WIDTH - 80),
     y: enemy.y - 28,
     life: 4,
     float: 0,
@@ -719,6 +724,174 @@ function escapeHtml(value) {
   })[char]);
 }
 
+function getSnapshot() {
+  return {
+    mode: state.mode,
+    score: Math.round(state.score),
+    wave: state.wave,
+    bossSpawned: state.bossSpawned,
+    running,
+    player: {
+      x: Math.round(state.player.x),
+      y: Math.round(state.player.y),
+      hp: Math.round(state.player.hp),
+      maxHp: state.player.maxHp,
+      facing: state.player.facing,
+      action: state.player.action,
+      defending: state.player.defending,
+      immuneTimer: Number(state.player.immuneTimer.toFixed(2))
+    },
+    enemies: state.enemies.map((enemy) => ({
+      id: enemy.id || `${enemy.kind}-${enemy.tier}-${Math.round(enemy.x)}-${Math.round(enemy.y)}`,
+      kind: enemy.kind,
+      tier: enemy.tier,
+      x: Math.round(enemy.x),
+      y: Math.round(enemy.y),
+      hp: Math.round(enemy.hp),
+      maxHp: enemy.maxHp,
+      score: enemy.score,
+      defending: enemy.defendTimer > 0,
+      attacking: enemy.attackAnim > 0
+    })),
+    items: state.items.map((item) => ({
+      type: item.type,
+      x: Math.round(item.x),
+      y: Math.round(item.y),
+      life: Number(item.life.toFixed(2))
+    }))
+  };
+}
+
+function clearAgentKeys() {
+  for (const key of ["arrowleft", "arrowright", "arrowup", "arrowdown", "a", "d", "w", "s", "shift", "l"]) {
+    keys.delete(key);
+  }
+}
+
+function applyAction(action = {}) {
+  if (action.start || state.mode !== "playing") {
+    startGame(action.name || playerName || "Agent");
+    return getSnapshot();
+  }
+
+  clearAgentKeys();
+  if (action.left) keys.add("arrowleft");
+  if (action.right) keys.add("arrowright");
+  if (action.up) keys.add("arrowup");
+  if (action.down) keys.add("arrowdown");
+  if (action.defend) keys.add("shift");
+  if (action.left) state.player.facing = -1;
+  if (action.right) state.player.facing = 1;
+  if (action.punch) playerAttack("punch");
+  if (action.kick) playerAttack("kick");
+  return getSnapshot();
+}
+
+function chooseAgentAction(snapshot = getSnapshot()) {
+  if (snapshot.mode !== "playing") return { start: true, name: params.get("name") || "Agent" };
+
+  const player = snapshot.player;
+  const goodItems = snapshot.items
+    .filter((item) => item.x >= 40 && item.x <= WIDTH - 80)
+    .filter((item) => item.type !== "bomb" && (item.type !== "heart" || player.hp < player.maxHp - 8))
+    .sort((a, b) => distance(player, a) - distance(player, b));
+  const dangerousBomb = snapshot.items.find((item) => item.x >= 40 && item.x <= WIDTH - 80 && item.type === "bomb" && Math.abs(item.x - player.x) < 70 && Math.abs(item.y - player.y) < 70);
+
+  if (dangerousBomb) {
+    return {
+      left: dangerousBomb.x >= player.x,
+      right: dangerousBomb.x < player.x,
+      up: dangerousBomb.y >= player.y,
+      down: dangerousBomb.y < player.y
+    };
+  }
+
+  if (goodItems[0] && goodItems[0].life > 0.45 && distance(player, goodItems[0]) < 280) {
+    return moveToward(player, goodItems[0], 18);
+  }
+
+  const target = snapshot.enemies
+    .slice()
+    .sort((a, b) => Math.abs(a.x - player.x) + Math.abs(a.y - player.y) - (Math.abs(b.x - player.x) + Math.abs(b.y - player.y)))[0];
+
+  if (!target) return { right: player.x < 440, down: player.y < 540, up: player.y > 570 };
+
+  const dx = target.x - player.x;
+  const dy = target.y - player.y;
+  const close = Math.abs(dx) < 285 && Math.abs(dy) < 68;
+  const threatened = close && (target.attacking || player.hp < 30);
+  const face = { left: dx < -10, right: dx > 10 };
+
+  if (threatened && agentTick % 3 === 0) return { defend: true };
+  if (!close) return moveToward(player, target, 92);
+  return agentTick % 4 === 0 ? { ...face, kick: true } : { ...face, punch: true };
+}
+
+function moveToward(from, to, tolerance) {
+  return {
+    left: to.x < from.x - tolerance,
+    right: to.x > from.x + tolerance,
+    up: to.y < from.y - 16,
+    down: to.y > from.y + 16
+  };
+}
+
+function distance(a, b) {
+  return Math.hypot(a.x - b.x, a.y - b.y);
+}
+
+async function requestAgentAction(snapshot) {
+  const endpoint = params.get("agentApi");
+  if (!endpoint) return chooseAgentAction(snapshot);
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ snapshot })
+    });
+    if (!response.ok) return chooseAgentAction(snapshot);
+    const payload = await response.json();
+    return payload.action || chooseAgentAction(snapshot);
+  } catch {
+    return chooseAgentAction(snapshot);
+  }
+}
+
+function setAgentMode(enabled, options = {}) {
+  window.clearInterval(agentTimer);
+  if (!enabled) {
+    clearAgentKeys();
+    agentTimer = 0;
+    return;
+  }
+  const delay = options.delay || 90;
+  const loopRuns = options.loop !== false;
+  agentTimer = window.setInterval(async () => {
+    agentTick += 1;
+    const snapshot = getSnapshot();
+    if (snapshot.mode !== "playing" && !loopRuns && snapshot.mode !== "ready") return;
+    const action = await requestAgentAction(snapshot);
+    applyAction(action);
+  }, delay);
+}
+
+function stepForTest(action = {}, dt = 0.033) {
+  applyAction(action);
+  update(dt);
+  draw();
+  return getSnapshot();
+}
+
+window.RobinFight = {
+  snapshot: getSnapshot,
+  applyAction,
+  chooseAgentAction,
+  setAgentMode,
+  stepForTest,
+  start: startGame,
+  stop: () => setAgentMode(false)
+};
+
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "j", "k", "l", "shift"].includes(key)) {
@@ -751,4 +924,8 @@ Promise.all(Object.values(assets).map((img) => new Promise((resolve) => {
   updateHud();
   renderScores();
   draw();
+  if (params.get("agent") === "1" || params.get("bot") === "1") {
+    playerNameInput.value = params.get("name") || "Agent";
+    setAgentMode(true, { loop: params.get("loop") !== "0" });
+  }
 });
