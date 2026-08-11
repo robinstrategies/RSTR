@@ -245,6 +245,13 @@ a {
   flex-wrap: wrap;
 }
 
+.home-topbar-hidden {
+  visibility: hidden;
+  height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
 .brand {
   font-family: "Cinzel", serif;
   font-weight: 800;
@@ -284,10 +291,11 @@ a {
   display: grid;
   align-items: center;
   padding: 32px 0 64px;
+  justify-items: center;
 }
 
 .hero-copy {
-  max-width: 760px;
+  width: min(1080px, 100%);
   padding: 34px;
   border: 1px solid var(--line);
   border-radius: 30px;
@@ -295,6 +303,7 @@ a {
   box-shadow: 0 24px 80px var(--shadow);
   backdrop-filter: blur(8px);
   animation: fade-up 900ms ease;
+  text-align: center;
 }
 
 .eyebrow {
@@ -329,10 +338,11 @@ h3 {
 
 .hero-support {
   margin: 0;
-  max-width: 58ch;
+  max-width: 860px;
   color: var(--muted);
   font-size: 1rem;
   line-height: 1.75;
+  margin-inline: auto;
 }
 
 .button-row {
@@ -340,6 +350,7 @@ h3 {
   gap: 14px;
   flex-wrap: wrap;
   margin-top: 28px;
+  justify-content: center;
 }
 
 .button {
