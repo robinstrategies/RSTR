@@ -113,9 +113,41 @@ a {
   inset: 0;
   pointer-events: none;
   z-index: 0;
-  background: radial-gradient(circle at 50% 46%, rgba(121, 241, 168, 0.42), rgba(48, 181, 102, 0.16) 10%, transparent 24%);
+  background: radial-gradient(circle at 50% 46%, rgba(121, 241, 168, 0.34), rgba(48, 181, 102, 0.14) 11%, transparent 25%);
   mix-blend-mode: screen;
   animation: crystal-pulse 4.8s ease-in-out infinite;
+}
+
+.crystal-glow::before,
+.crystal-glow::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+
+.crystal-glow::before {
+  width: 210px;
+  height: 360px;
+  background: linear-gradient(180deg, rgba(235, 255, 236, 0.72), rgba(121, 241, 168, 0.5) 48%, rgba(35, 217, 104, 0.32));
+  clip-path: polygon(50% 0, 100% 34%, 50% 50%, 0 34%, 50% 0, 50% 50%, 100% 66%, 50% 100%, 0 66%, 50% 50%);
+  filter: blur(10px) drop-shadow(0 0 38px rgba(121, 241, 168, 0.88));
+  opacity: 0.42;
+  transform: translate(-50%, -50%);
+  animation: crystal-core-glow 3.2s ease-in-out infinite;
+}
+
+.crystal-glow::after {
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(121, 241, 168, 0.48), rgba(48, 181, 102, 0.18) 32%, transparent 68%);
+  filter: blur(18px);
+  opacity: 0.4;
+  transform: translate(-50%, -50%);
+  animation: crystal-halo-breathe 4.8s ease-in-out infinite;
 }
 
 .city-scene .scene-illustration::before {
@@ -502,12 +534,34 @@ h3 {
 
 @keyframes crystal-pulse {
   0%, 100% {
-    opacity: 0.45;
+    opacity: 0.42;
     transform: scale(1);
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.74;
     transform: scale(1.03);
+  }
+}
+
+@keyframes crystal-core-glow {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(0.96);
+  }
+  50% {
+    opacity: 0.72;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+}
+
+@keyframes crystal-halo-breathe {
+  0%, 100% {
+    opacity: 0.3;
+    transform: translate(-50%, -50%) scale(0.92);
+  }
+  50% {
+    opacity: 0.68;
+    transform: translate(-50%, -50%) scale(1.08);
   }
 }
 
