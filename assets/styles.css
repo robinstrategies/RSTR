@@ -63,8 +63,9 @@ a {
 
 .city-scene {
   background:
-    radial-gradient(circle at 50% 15%, rgba(121, 241, 168, 0.12), transparent 24%),
-    linear-gradient(180deg, #04361d 0%, #020705 100%);
+    linear-gradient(180deg, rgba(1, 10, 5, 0.15) 0%, rgba(1, 7, 4, 0.48) 100%),
+    url("robincity-green-signal.png") center center / cover no-repeat,
+    #020705;
 }
 
 .manor-scene {
@@ -105,6 +106,12 @@ a {
 
 .city-scene .scene-illustration {
   display: none;
+}
+
+.city-scene .hero-copy {
+  background: linear-gradient(180deg, rgba(2, 14, 7, 0.58), rgba(1, 8, 4, 0.74));
+  border-color: rgba(121, 241, 168, 0.28);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 56px rgba(41, 198, 92, 0.1);
 }
 
 .city-scene .scene-illustration::before {
