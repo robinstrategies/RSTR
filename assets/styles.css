@@ -85,6 +85,11 @@ a {
     linear-gradient(180deg, #04361d 0%, #020705 100%);
 }
 
+.manor-scene .scene-illustration,
+.bureau-scene .scene-illustration {
+  display: none;
+}
+
 .scene-illustration {
   position: absolute;
   inset: 0;
