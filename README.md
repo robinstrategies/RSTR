@@ -1,15 +1,10 @@
-# RobinStrategy Docs
+# Robin Strategies
 
-Static multi-page docs site for the RobinStrategy parody DAO concept.
-
-## Local files
+Minimal four-page site:
 
 - `index.html`
-- `pages/manifesto.html`
-- `pages/dao.html`
-- `pages/treasury.html`
-- `pages/robinman.html`
 - `pages/whitepaper.html`
+- `pages/treasury.html`
 - `pages/legal.html`
 
-This repo is intended for GitHub Pages with a simple static setup and `.nojekyll`.
+The current build uses stylized scene backgrounds as placeholders until the final custom page images are generated.
