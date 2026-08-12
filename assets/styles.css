@@ -71,7 +71,7 @@ a {
 .bureau-scene {
   background:
     linear-gradient(180deg, rgba(57, 151, 65, 0.02) 0%, rgba(1, 7, 4, 0.08) 100%),
-    url("strategy-header-mark-on-green-4k.png?v=20260812-bottom-left-mark") left top / cover no-repeat,
+    url("strategy-header-mark-on-green-4k.png?v=20260812-visible-bottom-mark") left bottom / cover no-repeat,
     #399741;
 }
 
@@ -591,7 +591,7 @@ h3 {
   .tracker-scene,
   .bureau-scene {
     background-size: cover;
-    background-position: left top;
+    background-position: left bottom;
   }
 
   .hero-wrap {
