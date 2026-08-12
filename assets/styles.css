@@ -24,7 +24,7 @@ body {
   margin: 0;
   background: linear-gradient(180deg, #031008 0%, #020705 100%);
   color: var(--ivory);
-  font-family: "Inter", sans-serif;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
 }
 
 a {
@@ -71,7 +71,7 @@ a {
 .bureau-scene {
   background:
     linear-gradient(180deg, rgba(57, 151, 65, 0.02) 0%, rgba(1, 7, 4, 0.08) 100%),
-    url("strategy-header-mark-on-green-4k.png") left top / cover no-repeat,
+    url("strategy-header-mark-on-green-4k.png?v=20260812-bottom-left-mark") left top / cover no-repeat,
     #399741;
 }
 
@@ -96,9 +96,10 @@ a {
 }
 
 .city-scene .hero-copy {
-  background: linear-gradient(180deg, rgba(2, 14, 7, 0.96), rgba(1, 8, 4, 0.98));
-  border-color: rgba(121, 241, 168, 0.34);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.72), 0 0 56px rgba(41, 198, 92, 0.14);
+  background: rgba(57, 151, 65, 0.18);
+  border-color: rgba(57, 151, 65, 0.08);
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .city-scene .scene-illustration::before {
@@ -229,10 +230,10 @@ a {
 }
 
 .brand {
-  font-family: "Cinzel", serif;
-  font-weight: 800;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
+  font-weight: 400;
   letter-spacing: 0.1em;
-  text-transform: uppercase;
+  text-transform: none;
 }
 
 .home-brand-hidden {
@@ -244,7 +245,8 @@ a {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
-  color: var(--muted);
+  color: #020705;
+  font-weight: 800;
 }
 
 .nav-links a {
@@ -252,7 +254,7 @@ a {
 }
 
 .nav-links a:hover {
-  color: var(--ivory);
+  color: #020705;
   transform: translateY(-1px);
 }
 
@@ -275,7 +277,7 @@ a {
 .hero-copy {
   width: min(820px, calc(100vw - 88px));
   max-width: 100%;
-  padding: 24px 30px;
+  padding: 18px 30px 20px;
   border: 1px solid var(--line);
   border-radius: 30px;
   background: linear-gradient(180deg, rgba(4, 19, 11, 0.54), rgba(3, 11, 8, 0.66));
@@ -288,7 +290,7 @@ a {
 .eyebrow {
   margin: 0 0 10px;
   color: var(--green-glow);
-  text-transform: uppercase;
+  text-transform: none;
   letter-spacing: 0.16em;
   font-size: 0.82rem;
 }
@@ -297,15 +299,18 @@ h1,
 h2,
 h3 {
   margin-top: 0;
-  font-family: "Cinzel", serif;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
 }
 
 .hero-title {
   margin: 0;
-  font-size: clamp(2.7rem, 4.7vw, 3.45rem);
-  line-height: 0.98;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
+  font-weight: 400;
+  font-size: clamp(2.65rem, 4.65vw, 3.5rem);
+  line-height: 0.92;
+  text-transform: none;
+  letter-spacing: -0.055em;
+  color: #020705;
   max-width: 100%;
   margin-inline: auto;
   overflow-wrap: normal;
@@ -317,23 +322,24 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 14px;
+  gap: 4px;
   margin-bottom: 12px;
 }
 
 .hero-logo {
-  width: clamp(48px, 5vw, 68px);
-  height: clamp(48px, 5vw, 68px);
+  width: clamp(82px, 7vw, 116px);
+  height: clamp(82px, 7vw, 116px);
   border-radius: 50%;
   object-fit: cover;
   flex: 0 0 auto;
 }
 
 .hero-subtitle {
-  margin: 0 0 10px;
-  font-size: clamp(1.05rem, 1.55vw, 1.3rem);
-  color: var(--ivory);
-  font-weight: 600;
+  margin: 0 0 12px;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
+  font-size: clamp(1.05rem, 1.55vw, 1.35rem);
+  color: #020705;
+  font-weight: 400;
 }
 
 .hero-support {
@@ -361,9 +367,10 @@ h3 {
   min-height: 38px;
   padding: 0 14px;
   border-radius: 999px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.04);
-  color: var(--ivory);
+  border: 1px solid rgba(2, 14, 7, 0.34);
+  background: rgba(57, 151, 65, 0.16);
+  color: #020705;
+  font-weight: 800;
   text-align: center;
   white-space: nowrap;
   transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
@@ -371,12 +378,13 @@ h3 {
 
 .button:hover {
   transform: translateY(-2px);
-  border-color: rgba(121, 241, 168, 0.34);
+  border-color: rgba(2, 14, 7, 0.58);
+  background: rgba(57, 151, 65, 0.28);
 }
 
 .button-primary {
-  background: linear-gradient(135deg, #12602f, #2da85d);
-  border-color: rgba(121, 241, 168, 0.34);
+  background: rgba(57, 151, 65, 0.32);
+  border-color: rgba(2, 14, 7, 0.48);
 }
 
 .page-wrap {
@@ -405,12 +413,17 @@ h3 {
   font-size: clamp(2.4rem, 6vw, 4.8rem);
   line-height: 0.95;
   text-transform: uppercase;
+  color: #020705;
 }
 
 .page-hero p {
   margin: 0;
-  color: var(--muted);
+  color: #020705;
   line-height: 1.75;
+}
+
+.tracker-scene .page-hero .eyebrow {
+  color: #020705;
 }
 
 .content-card {
@@ -474,7 +487,7 @@ h3 {
 
 .tracker-value {
   margin: 0;
-  font-family: "Cinzel", serif;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
   font-size: 1.15rem;
   color: var(--ivory);
 }
@@ -559,8 +572,9 @@ h3 {
   }
 
   .hero-title {
-    font-size: 2.8rem;
+    font-size: 2.65rem;
     line-height: 0.92;
+    letter-spacing: -0.055em;
   }
 
   .hero-title-row {
@@ -599,15 +613,16 @@ h3 {
   }
 
   .hero-title {
-    font-size: clamp(1.2rem, 5.5vw, 1.4rem);
-    line-height: 1;
+    font-size: clamp(1.16rem, 5.4vw, 1.38rem);
+    line-height: 0.95;
+    letter-spacing: -0.04em;
     text-wrap: balance;
     overflow-wrap: normal;
   }
 
   .hero-logo {
-    width: 48px;
-    height: 48px;
+    width: 74px;
+    height: 74px;
   }
 
   .hero-subtitle {

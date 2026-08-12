@@ -29,7 +29,7 @@ body {
     radial-gradient(circle at 50% 8%, rgba(53, 201, 108, 0.15), transparent 34%),
     var(--bg);
   color: var(--cream);
-  font-family: "Inter", sans-serif;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
 }
 
 body::before {
@@ -85,7 +85,7 @@ button {
     0 20px 70px rgba(0, 0, 0, 0.38),
     0 0 24px rgba(121, 241, 168, 0.16);
   color: var(--cream);
-  font-family: "Cinzel", serif;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
   font-size: clamp(0.78rem, 1.15vw, 1rem);
   font-weight: 800;
   letter-spacing: 0.05em;
@@ -174,8 +174,8 @@ button {
 
 .brand-link {
   color: var(--cream);
-  font-family: "Cinzel", serif;
-  font-weight: 800;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
+  font-weight: 400;
   letter-spacing: 0.08em;
   text-decoration: none;
   text-transform: uppercase;
@@ -304,7 +304,7 @@ button {
 .start-panel h1,
 .scoreboard h2 {
   margin: 0;
-  font-family: "Cinzel", serif;
+  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
   text-transform: uppercase;
 }
 
