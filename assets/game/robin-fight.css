@@ -169,6 +169,7 @@ button {
   justify-content: space-between;
   gap: 16px;
   min-height: 48px;
+  flex-wrap: wrap;
 }
 
 .brand-link {
@@ -178,6 +179,32 @@ button {
   letter-spacing: 0.08em;
   text-decoration: none;
   text-transform: uppercase;
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 16px;
+  flex: 1 1 420px;
+  flex-wrap: wrap;
+  color: rgba(243, 238, 217, 0.82);
+  font-weight: 600;
+}
+
+.site-nav a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 160ms ease, transform 160ms ease;
+}
+
+.site-nav a:hover,
+.site-nav a[aria-current="page"] {
+  color: var(--green-soft);
+}
+
+.site-nav a:hover {
+  transform: translateY(-1px);
 }
 
 .hud {
@@ -402,25 +429,26 @@ button {
     grid-template-columns: 1fr;
   }
 
+  .game-topbar {
+    justify-content: center;
+  }
+
+  .brand-link,
+  .site-nav,
+  .hud {
+    flex: 1 1 100%;
+  }
+
+  .brand-link {
+    text-align: center;
+  }
+
   .scoreboard {
     min-height: 180px;
   }
 }
 
-@media (max-width: 640px) {
-  .comic-bubbles {
-    display: none;
-  }
-
-  .game-shell {
-    align-items: start;
-    padding: 10px;
-  }
-
-  .game-stage {
-    gap: 10px;
-  }
-
+@media (max-width: 900px) {
   .game-topbar {
     align-items: flex-start;
     flex-direction: column;
@@ -428,12 +456,85 @@ button {
     min-height: 0;
   }
 
+  .brand-link,
+  .site-nav,
+  .hud {
+    flex: 1 1 auto;
+    width: 100%;
+  }
+
+  .brand-link {
+    text-align: left;
+  }
+
+  .site-nav {
+    justify-content: flex-start;
+  }
+
+  .hud {
+    justify-content: stretch;
+  }
+}
+
+@media (max-width: 640px) {
+  html,
+  body {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .comic-bubbles {
+    display: none;
+  }
+
+  .game-shell {
+    width: 100%;
+    overflow-x: hidden;
+    align-items: start;
+    justify-items: stretch;
+    padding: 10px;
+  }
+
+  .game-stage {
+    width: min(100%, 370px);
+    min-width: 0;
+    margin-inline: 0;
+    gap: 10px;
+  }
+
+  .game-topbar {
+    align-items: flex-start;
+  }
+
   .brand-link {
     font-size: 0.78rem;
   }
 
+  .site-nav {
+    display: flex;
+    flex-direction: column;
+    align-self: flex-start;
+    width: auto;
+    max-width: 100%;
+    min-width: 0;
+    gap: 6px;
+    font-size: 0.78rem;
+    line-height: 1.35;
+  }
+
+  .site-nav a {
+    min-width: 0;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .site-nav a[aria-current="page"] {
+    grid-column: auto;
+  }
+
   .hud {
     width: 100%;
+    min-width: 0;
     justify-content: stretch;
     gap: 6px;
   }
@@ -448,6 +549,12 @@ button {
   }
 
   .health-meter {
+    min-width: 0;
+  }
+
+  .canvas-wrap,
+  .scoreboard {
+    width: 100%;
     min-width: 0;
   }
 

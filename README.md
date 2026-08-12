@@ -1,4 +1,4 @@
-# Robin Strategies
+# Robin Strategy
 
 Minimal four-page site:
 
