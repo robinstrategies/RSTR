@@ -382,28 +382,6 @@ button {
   background: rgba(255, 255, 255, 0.05);
 }
 
-.gesture-hint {
-  display: none;
-  position: absolute;
-  left: 50%;
-  bottom: 10px;
-  z-index: 4;
-  width: min(92%, 560px);
-  margin: 0;
-  padding: 9px 12px;
-  transform: translateX(-50%);
-  border: 1px solid rgba(121, 241, 168, 0.26);
-  border-radius: 999px;
-  background: rgba(1, 8, 5, 0.72);
-  color: rgba(243, 238, 217, 0.78);
-  font-size: 0.76rem;
-  font-weight: 700;
-  line-height: 1.25;
-  text-align: center;
-  pointer-events: none;
-  backdrop-filter: blur(8px);
-}
-
 @media (max-width: 1020px) {
   .comic-bubble {
     opacity: 0.42;
@@ -501,10 +479,6 @@ button {
   .start-panel p {
     font-size: 0.88rem;
     line-height: 1.4;
-  }
-
-  .start-panel.is-hidden + .gesture-hint {
-    display: block;
   }
 
   .scoreboard {

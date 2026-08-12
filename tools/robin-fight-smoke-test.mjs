@@ -47,17 +47,18 @@ try {
   }
 
   const gameHtml = await readFile(path.join(root, "pages", "robin-fight.html"), "utf8");
-  for (const token of ["gesture-hint", "Phone: drag left side to move", "tap, swipe up, or hold right side"]) {
+  for (const token of ["Phone: drag left side to move", "tap, swipe up, or hold right side"]) {
     if (!gameHtml.includes(token)) throw new Error(`Missing mobile gesture markup token: ${token}`);
   }
-  if (gameHtml.includes("touch-controls") || gameHtml.includes("data-touch-action")) {
-    throw new Error("Visible mobile button controls should not be present");
+  if (gameHtml.includes("touch-controls") || gameHtml.includes("data-touch-action") || gameHtml.includes("gesture-hint")) {
+    throw new Error("Visible mobile control overlays should not be present");
   }
 
   const gameCss = await readFile(path.join(root, "assets", "game", "robin-fight.css"), "utf8");
-  for (const token of [".gesture-hint", "touch-action: none"]) {
+  for (const token of ["touch-action: none"]) {
     if (!gameCss.includes(token)) throw new Error(`Missing mobile gesture CSS token: ${token}`);
   }
+  if (gameCss.includes(".gesture-hint")) throw new Error("Gesture hint CSS should not be present");
 
   for (const file of [
     "assets/game/robinman-player-clean.png",
