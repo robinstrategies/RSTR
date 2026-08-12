@@ -10,6 +10,7 @@ const source = await readFile(path.join(root, "assets", "game", "robin-fight.js"
 const rafQueue = [];
 const elements = new Map();
 const ctx = createCanvasContext();
+const canvasListeners = new Map();
 
 function element(id) {
   if (!elements.has(id)) {
@@ -61,7 +62,29 @@ const context = {
     height: 720,
     getContext() {
       return ctx;
+    },
+    getBoundingClientRect() {
+      return { left: 0, top: 0, width: 1280, height: 720 };
+    },
+    addEventListener(type, callback) {
+      if (!canvasListeners.has(type)) canvasListeners.set(type, []);
+      canvasListeners.get(type).push(callback);
+    },
+    setPointerCapture() {}
+  },
+  PointerEvent: class FakePointerEvent {
+    constructor(type, options = {}) {
+      this.type = type;
+      this.pointerId = options.pointerId || 1;
+      this.clientX = options.clientX || 0;
+      this.clientY = options.clientY || 0;
     }
+    preventDefault() {}
+  },
+  dispatchCanvasPointer(type, options = {}) {
+    const event = new context.PointerEvent(type, options);
+    for (const callback of canvasListeners.get(type) || []) callback(event);
+    return event;
   },
   localStorage: {
     store: new Map(),
@@ -126,6 +149,19 @@ await Promise.resolve();
 if (!context.window.RobinFight) throw new Error("RobinFight API was not exposed");
 
 let snapshot = context.window.RobinFight.stepForTest({ start: true, name: "HeadlessAgent" });
+const gestureStartX = snapshot.player.x;
+context.dispatchCanvasPointer("pointerdown", { pointerId: 42, clientX: 120, clientY: 520 });
+context.dispatchCanvasPointer("pointermove", { pointerId: 42, clientX: 270, clientY: 520 });
+for (let i = 0; i < 12; i += 1) {
+  context.__now += 33;
+  snapshot = context.window.RobinFight.stepForTest({}, 0.033);
+}
+context.dispatchCanvasPointer("pointerup", { pointerId: 42, clientX: 270, clientY: 520 });
+if (snapshot.player.x <= gestureStartX + 8) {
+  throw new Error(`Expected left-side drag to move player right, started ${gestureStartX}, ended ${snapshot.player.x}`);
+}
+
+snapshot = context.window.RobinFight.stepForTest({ start: true, name: "HeadlessAgent" });
 let bestScore = 0;
 let bestWave = 1;
 let runBestScore = 0;

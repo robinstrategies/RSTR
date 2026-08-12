@@ -32,6 +32,7 @@ const assets = {
 };
 
 const keys = new Set();
+const gestureMove = { active: false, x: 0, y: 0 };
 const params = new URLSearchParams(window.location.search);
 let playerName = "player";
 let state = createState();
@@ -261,6 +262,10 @@ function updatePlayer(dt) {
     if (keys.has("arrowright") || keys.has("d")) dx += 1;
     if (keys.has("arrowup") || keys.has("w")) dy -= 1;
     if (keys.has("arrowdown") || keys.has("s")) dy += 1;
+    if (gestureMove.active) {
+      dx += gestureMove.x;
+      dy += gestureMove.y;
+    }
   }
 
   if (dx !== 0 || dy !== 0) {
@@ -1285,6 +1290,9 @@ function setupGestureControls() {
 
   function releaseMovement() {
     movementKeys.forEach((key) => keys.delete(key));
+    gestureMove.active = false;
+    gestureMove.x = 0;
+    gestureMove.y = 0;
     movePointerId = null;
   }
 
@@ -1304,14 +1312,24 @@ function setupGestureControls() {
 
   function setMovement(point, origin) {
     movementKeys.forEach((key) => keys.delete(key));
-    const dx = point.x - origin.x;
-    const dy = point.y - origin.y;
+    const dx = point.x - (origin.startX ?? origin.x);
+    const dy = point.y - (origin.startY ?? origin.y);
     const deadZone = Math.max(12, point.width * 0.035);
+    const maxDistance = Math.max(36, point.width * 0.16);
+
+    gestureMove.x = 0;
+    gestureMove.y = 0;
+    gestureMove.active = Math.abs(dx) > deadZone || Math.abs(dy) > deadZone;
 
     if (dx < -deadZone) keys.add("arrowleft");
     if (dx > deadZone) keys.add("arrowright");
     if (dy < -deadZone) keys.add("arrowup");
     if (dy > deadZone) keys.add("arrowdown");
+
+    if (gestureMove.active) {
+      gestureMove.x = clamp(dx / maxDistance, -1, 1);
+      gestureMove.y = clamp(dy / maxDistance, -1, 1);
+    }
   }
 
   canvas.addEventListener("contextmenu", (event) => event.preventDefault());
