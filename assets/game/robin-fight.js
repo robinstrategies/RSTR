@@ -122,7 +122,7 @@ function startGame(name) {
   state = createState();
   state.mode = "playing";
   gameStartTime = performance.now();
-  startPanel.querySelector("h1").textContent = "Robinman Alley Fight";
+  startPanel.querySelector("h1").textContent = "ROBINCITY Clean Up";
   startPanel.querySelector("p").textContent = "Move with arrows or WASD. Punch with J. Kick with K. Hold Shift or L to defend.";
   startPanel.classList.add("is-hidden");
   running = true;
@@ -525,7 +525,7 @@ function setupAudio() {
   musicGain = audioContext.createGain();
   sfxGain = audioContext.createGain();
   masterGain.gain.value = 0.42;
-  musicGain.gain.value = 0.2;
+  musicGain.gain.value = 0.17;
   sfxGain.gain.value = 0.34;
   musicGain.connect(masterGain);
   sfxGain.connect(masterGain);
@@ -546,7 +546,7 @@ function startMusic() {
   audioContext.resume();
   if (musicTimer) return;
   scheduleMusicStep();
-  musicTimer = window.setInterval(scheduleMusicStep, 125);
+  musicTimer = window.setInterval(scheduleMusicStep, 112);
 }
 
 function stopMusic() {
@@ -558,20 +558,35 @@ function stopMusic() {
 function scheduleMusicStep() {
   if (!audioContext || !musicGain) return;
   const t = audioContext.currentTime + 0.02;
-  const step = musicStep % 32;
-  const bass = [55, 55, 82.41, 55, 73.42, 55, 98, 82.41];
-  const lead = [220, 0, 261.63, 0, 293.66, 329.63, 293.66, 261.63, 220, 0, 196, 0, 220, 246.94, 261.63, 329.63];
+  const step = musicStep % 64;
+  const bassRoots = [82.41, 82.41, 98, 82.41, 73.42, 73.42, 65.41, 73.42];
+  const arpeggio = [329.63, 392, 493.88, 392, 293.66, 369.99, 493.88, 369.99];
+  const lead = [
+    659.25, 0, 587.33, 493.88, 0, 523.25, 493.88, 440,
+    392, 0, 440, 493.88, 587.33, 0, 523.25, 493.88,
+    659.25, 0, 783.99, 659.25, 587.33, 523.25, 0, 493.88,
+    440, 0, 493.88, 440, 392, 369.99, 392, 0
+  ];
 
-  if (step % 2 === 0) {
-    playTone(bass[(step / 2) % bass.length], 0.08, t, "square", 0.16, musicGain);
+  if (step % 4 === 0) {
+    const root = bassRoots[Math.floor(step / 8) % bassRoots.length];
+    playTone(root, 0.15, t, "square", 0.14, musicGain, root * 0.5);
   }
-  if (step % 4 !== 1) {
-    const note = lead[step % lead.length];
-    if (note) playTone(note, 0.055, t, "square", 0.07, musicGain);
+
+  if (step % 2 === 1) {
+    const note = arpeggio[Math.floor(step / 2) % arpeggio.length];
+    playTone(note, 0.045, t, "triangle", 0.055, musicGain);
   }
-  if (step % 4 === 0) playNoise(0.04, t, 0.1, musicGain);
-  if (step % 8 === 4) playNoise(0.07, t, 0.055, musicGain);
-  if (step % 16 === 15) playTone(880, 0.035, t, "triangle", 0.05, musicGain);
+
+  if (step % 4 === 2 || step % 16 === 14) {
+    const note = lead[Math.floor(step / 2) % lead.length];
+    if (note) playTone(note, 0.075, t, "square", 0.07, musicGain);
+  }
+
+  if (step % 16 === 0) playNoise(0.045, t, 0.12, musicGain);
+  if (step % 16 === 8) playNoise(0.075, t, 0.065, musicGain);
+  if (step % 4 === 3) playNoise(0.025, t, 0.025, musicGain);
+  if (step % 32 === 31) playTone(987.77, 0.055, t, "triangle", 0.045, musicGain, 1318.51);
   musicStep += 1;
 }
 

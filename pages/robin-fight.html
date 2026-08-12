@@ -3,15 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Robinman Alley Fight</title>
+  <title>ROBINCITY Clean Up</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../assets/game/robin-fight.css">
 </head>
 <body>
+  <div class="comic-bubbles" aria-hidden="true">
+    <span class="comic-bubble bubble-one">ROBIN STRATEGIES SAVE US!</span>
+    <span class="comic-bubble bubble-two">THE BEARS ARE COMING!</span>
+    <span class="comic-bubble bubble-three">CLEAN UP THE MARKET!</span>
+    <span class="comic-bubble bubble-four">ROBINCITY NEEDS YOU!</span>
+  </div>
   <main class="game-shell">
-    <section class="game-stage" aria-label="Robinman Alley Fight game">
+    <section class="game-stage" aria-label="ROBINCITY Clean Up game">
       <div class="game-topbar">
         <a class="brand-link" href="../index.html">Robin Strategies</a>
         <div class="hud" aria-live="polite">
@@ -28,7 +34,7 @@
       <div class="canvas-wrap">
         <canvas id="gameCanvas" width="1280" height="720"></canvas>
         <div class="start-panel" id="startPanel">
-          <h1>Robinman Alley Fight</h1>
+          <h1>ROBINCITY Clean Up</h1>
           <form id="playerForm">
             <label for="playerName">Username</label>
             <div class="start-row">
@@ -51,7 +57,7 @@
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/game/robin-fight-config.js?v=bear-market-v2"></script>
-  <script src="../assets/game/robin-fight.js?v=bear-market-v2"></script>
+  <script src="../assets/game/robin-fight-config.js?v=robincity-cleanup-v1"></script>
+  <script src="../assets/game/robin-fight.js?v=robincity-cleanup-v1"></script>
 </body>
 </html>
