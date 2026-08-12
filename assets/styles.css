@@ -436,6 +436,7 @@ h3 {
   box-shadow: 0 24px 80px var(--shadow);
   backdrop-filter: blur(8px);
   text-align: center;
+  font-family: "Inter", sans-serif;
 }
 
 .content-card p,
@@ -452,11 +453,13 @@ h3 {
 .content-card h2 {
   margin-top: 0;
   margin-bottom: 14px;
+  font-family: "Cinzel", serif;
   font-size: 1.45rem;
 }
 
 .content-card h3 {
   margin-bottom: 8px;
+  font-family: "Cinzel", serif;
   font-size: 1.05rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -487,7 +490,7 @@ h3 {
 
 .tracker-value {
   margin: 0;
-  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
+  font-family: "Cinzel", serif;
   font-size: 1.15rem;
   color: var(--ivory);
 }
