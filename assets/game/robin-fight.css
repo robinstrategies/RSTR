@@ -16,6 +16,7 @@
 html,
 body {
   min-height: 100%;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -57,6 +58,7 @@ button {
   position: relative;
   z-index: 2;
   min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   place-items: center;
   padding: 18px;
@@ -248,6 +250,7 @@ button {
   overflow: hidden;
   background: #010604;
   box-shadow: 0 24px 90px rgba(0, 0, 0, 0.64);
+  touch-action: none;
 }
 
 #gameCanvas {
@@ -379,6 +382,28 @@ button {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.gesture-hint {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  z-index: 4;
+  width: min(92%, 560px);
+  margin: 0;
+  padding: 9px 12px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(121, 241, 168, 0.26);
+  border-radius: 999px;
+  background: rgba(1, 8, 5, 0.72);
+  color: rgba(243, 238, 217, 0.78);
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+
 @media (max-width: 1020px) {
   .comic-bubble {
     opacity: 0.42;
@@ -410,26 +435,79 @@ button {
   }
 
   .game-shell {
+    align-items: start;
     padding: 10px;
+  }
+
+  .game-stage {
+    gap: 10px;
   }
 
   .game-topbar {
     align-items: flex-start;
     flex-direction: column;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  .brand-link {
+    font-size: 0.78rem;
   }
 
   .hud {
     width: 100%;
     justify-content: stretch;
+    gap: 6px;
   }
 
   .hud > span,
   .music-toggle {
-    flex: 1;
+    flex: 1 1 calc(50% - 4px);
     min-width: 0;
+    min-height: 40px;
+    padding: 8px 7px;
+    font-size: 0.72rem;
+  }
+
+  .health-meter {
+    min-width: 0;
+  }
+
+  .start-panel {
+    width: min(340px, calc(100% - 18px));
+    max-height: calc(100% - 12px);
+    overflow: auto;
+    padding: 18px;
+  }
+
+  .start-panel h1 {
+    font-size: clamp(1.6rem, 9vw, 2.35rem);
+  }
+
+  .start-panel form {
+    margin-top: 14px;
   }
 
   .start-row {
     grid-template-columns: 1fr;
+  }
+
+  .start-row input,
+  .start-row button,
+  .scoreboard button {
+    min-height: 44px;
+  }
+
+  .start-panel p {
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  .start-panel.is-hidden + .gesture-hint {
+    display: block;
+  }
+
+  .scoreboard {
+    padding: 14px;
   }
 }

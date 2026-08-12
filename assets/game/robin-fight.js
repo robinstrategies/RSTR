@@ -21,6 +21,7 @@ const SCORE_KEY = "robinman-alley-fight-scores";
 const MUSIC_KEY = "robinman-byte-fighter-music";
 const LEADERBOARD_RPC = "get_robin_fight_leaderboard";
 const SUBMIT_SCORE_FUNCTION = "submit-robin-score";
+const CONTROL_TEXT = "PC: arrows/WASD to move, J punch, K kick, Shift/L guard. Phone: drag left side to move; tap, swipe up, or hold right side to fight.";
 
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
@@ -123,7 +124,7 @@ function startGame(name) {
   state.mode = "playing";
   gameStartTime = performance.now();
   startPanel.querySelector("h1").textContent = "ROBINCITY Clean Up";
-  startPanel.querySelector("p").textContent = "Move with arrows or WASD. Punch with J. Kick with K. Hold Shift or L to defend.";
+  startPanel.querySelector("p").textContent = CONTROL_TEXT;
   startPanel.classList.add("is-hidden");
   running = true;
   lastTime = performance.now();
@@ -1274,6 +1275,139 @@ window.RobinFight = {
   stop: () => setAgentMode(false)
 };
 
+function setupGestureControls() {
+  if (!canvas || !canvas.addEventListener) return;
+
+  const movementKeys = ["arrowleft", "arrowright", "arrowup", "arrowdown"];
+  const pointers = new Map();
+  let movePointerId = null;
+  let actionPointerId = null;
+
+  function releaseMovement() {
+    movementKeys.forEach((key) => keys.delete(key));
+    movePointerId = null;
+  }
+
+  function releaseGuard() {
+    keys.delete("shift");
+  }
+
+  function pointerPoint(event) {
+    const rect = canvas.getBoundingClientRect ? canvas.getBoundingClientRect() : { left: 0, top: 0, width: WIDTH, height: HEIGHT };
+    return {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+      width: rect.width || WIDTH,
+      height: rect.height || HEIGHT
+    };
+  }
+
+  function setMovement(point, origin) {
+    movementKeys.forEach((key) => keys.delete(key));
+    const dx = point.x - origin.x;
+    const dy = point.y - origin.y;
+    const deadZone = Math.max(12, point.width * 0.035);
+
+    if (dx < -deadZone) keys.add("arrowleft");
+    if (dx > deadZone) keys.add("arrowright");
+    if (dy < -deadZone) keys.add("arrowup");
+    if (dy > deadZone) keys.add("arrowdown");
+  }
+
+  canvas.addEventListener("contextmenu", (event) => event.preventDefault());
+
+  canvas.addEventListener("pointerdown", (event) => {
+    const point = pointerPoint(event);
+    const side = point.x < point.width / 2 ? "move" : "action";
+    const data = {
+      side,
+      startX: point.x,
+      startY: point.y,
+      x: point.x,
+      y: point.y,
+      width: point.width,
+      startedAt: performance.now(),
+      holdTimer: 0,
+      guarding: false
+    };
+
+    event.preventDefault();
+    if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+    pointers.set(event.pointerId, data);
+
+    if (side === "move") {
+      if (movePointerId !== null && movePointerId !== event.pointerId) releaseMovement();
+      movePointerId = event.pointerId;
+      setMovement(point, data);
+    } else {
+      if (actionPointerId === null) actionPointerId = event.pointerId;
+      data.holdTimer = window.setTimeout(() => {
+        if (!pointers.has(event.pointerId)) return;
+        data.guarding = true;
+        keys.add("shift");
+      }, 330);
+    }
+  });
+
+  canvas.addEventListener("pointermove", (event) => {
+    const data = pointers.get(event.pointerId);
+    if (!data) return;
+
+    event.preventDefault();
+    const point = pointerPoint(event);
+    data.x = point.x;
+    data.y = point.y;
+
+    if (data.side === "move" && movePointerId === event.pointerId) {
+      setMovement(point, data);
+    }
+  });
+
+  function endPointer(event) {
+    const data = pointers.get(event.pointerId);
+    if (!data) return;
+
+    event.preventDefault();
+    if (data.holdTimer) window.clearTimeout(data.holdTimer);
+    pointers.delete(event.pointerId);
+
+    if (data.side === "move" && movePointerId === event.pointerId) {
+      releaseMovement();
+    }
+
+    if (data.side === "action") {
+      const dx = data.x - data.startX;
+      const dy = data.y - data.startY;
+      const elapsed = performance.now() - data.startedAt;
+      const swipeDistance = Math.max(28, data.width * 0.07);
+
+      if (data.guarding) {
+        releaseGuard();
+      } else if (dy < -swipeDistance && Math.abs(dy) > Math.abs(dx) * 1.15) {
+        playerAttack("kick");
+      } else if (elapsed < 420) {
+        playerAttack("punch");
+      }
+
+      if (actionPointerId === event.pointerId) actionPointerId = null;
+    }
+  }
+
+  canvas.addEventListener("pointerup", endPointer);
+  canvas.addEventListener("pointercancel", endPointer);
+  canvas.addEventListener("lostpointercapture", endPointer);
+
+  window.addEventListener("blur", () => {
+    pointers.forEach((data) => {
+      if (data.holdTimer) window.clearTimeout(data.holdTimer);
+    });
+    pointers.clear();
+    releaseMovement();
+    releaseGuard();
+    actionPointerId = null;
+  });
+}
+
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
   if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "j", "k", "l", "shift"].includes(key)) {
@@ -1305,6 +1439,8 @@ if (musicToggle) {
     setMusicEnabled(!musicEnabled);
   });
 }
+
+setupGestureControls();
 
 Promise.all(Object.values(assets).map((img) => new Promise((resolve) => {
   if (img.complete) resolve();

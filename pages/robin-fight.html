@@ -7,7 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/game/robin-fight.css">
+  <link rel="stylesheet" href="../assets/game/robin-fight.css?v=robincity-gestures-v1">
 </head>
 <body>
   <div class="comic-bubbles" aria-hidden="true">
@@ -42,8 +42,9 @@
               <button type="submit">Start</button>
             </div>
           </form>
-          <p>Move with arrows or WASD. Punch with J. Kick with K. Hold Shift or L to defend.</p>
+          <p>PC: arrows/WASD to move, J punch, K kick, Shift/L guard. Phone: drag left side to move; tap, swipe up, or hold right side to fight.</p>
         </div>
+        <p class="gesture-hint">Left side: drag to move · Right side: tap punch, swipe up kick, hold guard</p>
       </div>
 
       <aside class="scoreboard" aria-label="Local scoreboard">
@@ -57,7 +58,7 @@
     </section>
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../assets/game/robin-fight-config.js?v=robincity-cleanup-v1"></script>
-  <script src="../assets/game/robin-fight.js?v=robincity-cleanup-v1"></script>
+  <script src="../assets/game/robin-fight-config.js?v=robincity-gestures-v1"></script>
+  <script src="../assets/game/robin-fight.js?v=robincity-gestures-v1"></script>
 </body>
 </html>
