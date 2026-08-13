@@ -65,6 +65,92 @@ a {
   background: radial-gradient(circle at center, transparent 62%, rgba(0, 0, 0, 0.24) 100%);
 }
 
+.site-dimmer-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  background:
+    radial-gradient(circle at top right, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.3) 34%, rgba(0, 0, 0, 0.2) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.18));
+  transition: opacity 180ms ease;
+}
+
+.site-dimmed .site-dimmer-overlay {
+  opacity: 1;
+}
+
+.site-dimmer-toggle {
+  position: fixed;
+  top: max(16px, env(safe-area-inset-top));
+  right: max(16px, env(safe-area-inset-right));
+  z-index: 5;
+  border: 1px solid rgba(2, 14, 7, 0.16);
+  border-radius: 50%;
+  background: rgba(204, 255, 0, 0.08);
+  color: #020705;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  font: inherit;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: none;
+  backdrop-filter: blur(2px);
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.site-dimmer-toggle:hover {
+  transform: translateY(-1px);
+  background: rgba(204, 255, 0, 0.18);
+  border-color: rgba(2, 14, 7, 0.28);
+}
+
+.site-dimmer-toggle[aria-pressed="false"] {
+  opacity: 0.68;
+}
+
+.site-dimmer-toggle[aria-pressed="true"] {
+  background: rgba(2, 7, 5, 0.12);
+  border-color: rgba(2, 14, 7, 0.24);
+  opacity: 0.9;
+}
+
+.dimmer-bulb {
+  position: relative;
+  display: inline-block;
+  width: 14px;
+  height: 17px;
+  border: 2px solid currentColor;
+  border-bottom: 0;
+  border-radius: 50% 50% 44% 44%;
+  color: #020705;
+}
+
+.dimmer-bulb::before {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: -5px;
+  height: 5px;
+  border: 2px solid currentColor;
+  border-top: 0;
+  border-radius: 0 0 4px 4px;
+}
+
+.dimmer-bulb::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  bottom: -8px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
 .city-scene,
 .manor-scene,
 .tracker-scene,
@@ -687,5 +773,13 @@ h3 {
     min-height: 36px;
     padding: 0 9px;
     font-size: 0.74rem;
+  }
+
+  .site-dimmer-toggle {
+    top: max(10px, env(safe-area-inset-top));
+    right: max(10px, env(safe-area-inset-right));
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
   }
 }
