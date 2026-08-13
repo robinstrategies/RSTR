@@ -23,26 +23,13 @@ body {
   margin: 0;
   position: relative;
   overflow-x: hidden;
-  background:
-    radial-gradient(circle at 14% 18%, rgba(121, 241, 168, 0.13), transparent 22%),
-    radial-gradient(circle at 86% 10%, rgba(255, 77, 66, 0.1), transparent 20%),
-    radial-gradient(circle at 50% 8%, rgba(53, 201, 108, 0.15), transparent 34%),
-    var(--bg);
+  background: #000;
   color: var(--cream);
   font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
 }
 
 body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background:
-    linear-gradient(90deg, rgba(121, 241, 168, 0.035) 1px, transparent 1px),
-    linear-gradient(rgba(121, 241, 168, 0.03) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(circle at center, rgba(0, 0, 0, 0.55), transparent 78%);
+  content: none;
 }
 
 button,
@@ -64,97 +51,6 @@ button {
   padding: 18px;
 }
 
-.comic-bubbles {
-  position: fixed;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.comic-bubble {
-  position: absolute;
-  max-width: 250px;
-  padding: 16px 20px;
-  border: 2px solid rgba(243, 238, 217, 0.82);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.16), transparent 30%),
-    rgba(3, 11, 8, 0.72);
-  box-shadow:
-    0 20px 70px rgba(0, 0, 0, 0.38),
-    0 0 24px rgba(121, 241, 168, 0.16);
-  color: var(--cream);
-  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
-  font-size: clamp(0.78rem, 1.15vw, 1rem);
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  line-height: 1.12;
-  text-align: center;
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.52);
-  opacity: 0.78;
-}
-
-.comic-bubble::after {
-  content: "";
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-right: 2px solid rgba(243, 238, 217, 0.82);
-  border-bottom: 2px solid rgba(243, 238, 217, 0.82);
-  background: rgba(3, 11, 8, 0.72);
-  transform: rotate(45deg);
-}
-
-.bubble-one {
-  left: max(18px, calc(50vw - 770px));
-  top: 18%;
-  transform: rotate(-8deg);
-}
-
-.bubble-one::after {
-  right: 28px;
-  bottom: -11px;
-}
-
-.bubble-two {
-  right: max(18px, calc(50vw - 770px));
-  top: 14%;
-  color: #ffb4aa;
-  border-color: rgba(255, 111, 102, 0.82);
-  transform: rotate(7deg);
-}
-
-.bubble-two::after {
-  left: 32px;
-  bottom: -11px;
-  border-color: rgba(255, 111, 102, 0.82);
-}
-
-.bubble-three {
-  left: max(18px, calc(50vw - 760px));
-  bottom: 13%;
-  transform: rotate(5deg);
-}
-
-.bubble-three::after {
-  right: 44px;
-  top: -11px;
-  transform: rotate(225deg);
-}
-
-.bubble-four {
-  right: max(18px, calc(50vw - 760px));
-  bottom: 10%;
-  transform: rotate(-6deg);
-}
-
-.bubble-four::after {
-  left: 46px;
-  top: -11px;
-  transform: rotate(225deg);
-}
-
 .game-stage {
   width: min(1500px, 100%);
   display: grid;
@@ -166,19 +62,10 @@ button {
   grid-column: 1 / -1;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 16px;
   min-height: 48px;
   flex-wrap: wrap;
-}
-
-.brand-link {
-  color: var(--cream);
-  font-family: "Archivo Black", "Inter", "Arial Black", sans-serif;
-  font-weight: 400;
-  letter-spacing: 0.08em;
-  text-decoration: none;
-  text-transform: uppercase;
 }
 
 .site-nav {
@@ -410,21 +297,6 @@ button {
 }
 
 @media (max-width: 1020px) {
-  .comic-bubble {
-    opacity: 0.42;
-    transform: scale(0.86);
-  }
-
-  .bubble-one,
-  .bubble-three {
-    left: -42px;
-  }
-
-  .bubble-two,
-  .bubble-four {
-    right: -42px;
-  }
-
   .game-stage {
     grid-template-columns: 1fr;
   }
@@ -433,14 +305,9 @@ button {
     justify-content: center;
   }
 
-  .brand-link,
   .site-nav,
   .hud {
     flex: 1 1 100%;
-  }
-
-  .brand-link {
-    text-align: center;
   }
 
   .scoreboard {
@@ -456,15 +323,10 @@ button {
     min-height: 0;
   }
 
-  .brand-link,
   .site-nav,
   .hud {
     flex: 1 1 auto;
     width: 100%;
-  }
-
-  .brand-link {
-    text-align: left;
   }
 
   .site-nav {
@@ -481,10 +343,6 @@ button {
   body {
     width: 100%;
     overflow-x: hidden;
-  }
-
-  .comic-bubbles {
-    display: none;
   }
 
   .game-shell {
@@ -504,10 +362,6 @@ button {
 
   .game-topbar {
     align-items: flex-start;
-  }
-
-  .brand-link {
-    font-size: 0.78rem;
   }
 
   .site-nav {

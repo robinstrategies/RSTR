@@ -1,8 +1,8 @@
 :root {
   --bg: #020705;
   --bg-deep: #04361d;
-  --green: #399741;
-  --green-bright: #399741;
+  --green: #ccff00;
+  --green-bright: #ccff00;
   --green-glow: #79f1a8;
   --ivory: #f3eed9;
   --muted: #c7d5c6;
@@ -70,9 +70,9 @@ a {
 .tracker-scene,
 .bureau-scene {
   background:
-    linear-gradient(180deg, rgba(57, 151, 65, 0.02) 0%, rgba(1, 7, 4, 0.08) 100%),
-    url("strategy-header-mark-on-green-4k.png?v=20260812-visible-bottom-mark") left bottom / cover no-repeat,
-    #399741;
+    linear-gradient(180deg, rgba(204, 255, 0, 0.02) 0%, rgba(1, 7, 4, 0.04) 100%),
+    url("strategy-header-mark-on-green-4k.png?v=20260812-robinhood-neon-green") left bottom / cover no-repeat,
+    #ccff00;
 }
 
 .city-scene .scene-illustration,
@@ -96,8 +96,8 @@ a {
 }
 
 .city-scene .hero-copy {
-  background: rgba(57, 151, 65, 0.18);
-  border-color: rgba(57, 151, 65, 0.08);
+  background: rgba(204, 255, 0, 0.18);
+  border-color: rgba(204, 255, 0, 0.08);
   box-shadow: none;
   backdrop-filter: none;
 }
@@ -368,7 +368,7 @@ h3 {
   padding: 0 14px;
   border-radius: 999px;
   border: 1px solid rgba(2, 14, 7, 0.34);
-  background: rgba(57, 151, 65, 0.16);
+  background: rgba(204, 255, 0, 0.16);
   color: #020705;
   font-weight: 800;
   text-align: center;
@@ -379,11 +379,11 @@ h3 {
 .button:hover {
   transform: translateY(-2px);
   border-color: rgba(2, 14, 7, 0.58);
-  background: rgba(57, 151, 65, 0.28);
+  background: rgba(204, 255, 0, 0.28);
 }
 
 .button-primary {
-  background: rgba(57, 151, 65, 0.32);
+  background: rgba(204, 255, 0, 0.32);
   border-color: rgba(2, 14, 7, 0.48);
 }
 

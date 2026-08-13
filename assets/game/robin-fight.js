@@ -25,7 +25,7 @@ const CONTROL_TEXT = "PC: arrows/WASD to move, J punch, K kick, Shift/L guard. P
 
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
-  robinman: loadImage("../assets/game/robinman-player-clean.png"),
+  robinman: loadImage("../assets/game/robinman-player-black-gold-neon-arrows.png?v=black-gold-neon-arrows-v1"),
   villains: loadImage("../assets/game/villains-bear-market.png?v=opacity-facing-fix"),
   bear: loadImage("../assets/game/bear-market-brute.png?v=opacity-facing-fix"),
   boss: loadImage("../assets/game/boss-v2.png")
