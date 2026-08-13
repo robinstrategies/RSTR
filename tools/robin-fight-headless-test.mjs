@@ -19,8 +19,8 @@ function element(id) {
       value: "",
       textContent: "",
       innerHTML: "",
-      style: {},
-      classList: { add() {}, remove() {} },
+      style: { setProperty() {} },
+      classList: { add() {}, remove() {}, toggle() {} },
       setAttribute() {},
       addEventListener() {},
       appendChild() {},
@@ -134,6 +134,12 @@ const context = {
   requestAnimationFrame(callback) {
     rafQueue.push(callback);
   },
+  setTimeout(callback) {
+    return globalThis.setTimeout(callback, 0);
+  },
+  clearTimeout(id) {
+    globalThis.clearTimeout(id);
+  },
   setInterval() {
     return 1;
   },
@@ -159,6 +165,39 @@ for (let i = 0; i < 12; i += 1) {
 context.dispatchCanvasPointer("pointerup", { pointerId: 42, clientX: 270, clientY: 520 });
 if (snapshot.player.x <= gestureStartX + 8) {
   throw new Error(`Expected left-side drag to move player right, started ${gestureStartX}, ended ${snapshot.player.x}`);
+}
+
+snapshot = context.window.RobinFight.stepForTest({ start: true, name: "HeadlessAgent" });
+let beforeCall = context.window.RobinFight.stepForTest({}, 0.033);
+beforeCall = context.window.RobinFight.stepForTest({ robinCall: true }, 0.033);
+if (beforeCall.robinCallReady || beforeCall.robinCallCooldown <= 0) {
+  throw new Error(`Expected Robin Call to start cooldown, got ${JSON.stringify(beforeCall)}`);
+}
+for (let i = 0; i < 20; i += 1) {
+  context.__now += 33;
+  beforeCall = context.window.RobinFight.stepForTest({}, 0.033);
+}
+if (beforeCall.robinCallCooldown >= 28 || beforeCall.robinCallCooldown <= 26) {
+  throw new Error(`Expected Robin Call cooldown to tick down, got ${beforeCall.robinCallCooldown}`);
+}
+
+snapshot = context.window.RobinFight.stepForTest({ start: true, name: "HeadlessAgent" });
+const circle = Array.from({ length: 18 }, (_, index) => {
+  const angle = (Math.PI * 2 * index) / 17;
+  return [
+    1040 + Math.cos(angle) * 72,
+    462 + Math.sin(angle) * 58
+  ];
+});
+context.dispatchCanvasPointer("pointerdown", { pointerId: 43, clientX: circle[0][0], clientY: circle[0][1] });
+for (let i = 1; i < circle.length; i += 1) {
+  context.__now += 33;
+  context.dispatchCanvasPointer("pointermove", { pointerId: 43, clientX: circle[i][0], clientY: circle[i][1] });
+}
+context.dispatchCanvasPointer("pointerup", { pointerId: 43, clientX: circle.at(-1)[0], clientY: circle.at(-1)[1] });
+snapshot = context.window.RobinFight.stepForTest({}, 0.033);
+if (snapshot.robinCallReady || snapshot.robinCallCooldown <= 0) {
+  throw new Error(`Expected circle gesture to trigger Robin Call, got ${JSON.stringify(snapshot)}`);
 }
 
 snapshot = context.window.RobinFight.stepForTest({ start: true, name: "HeadlessAgent" });
@@ -235,6 +274,7 @@ function createCanvasContext() {
     bezierCurveTo: noop,
     quadraticCurveTo: noop,
     arc: noop,
+    ellipse: noop,
     fill: noop,
     stroke: noop,
     closePath: noop,

@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ROBINCITY Clean Up</title>
+  <title>Robincity Market Nights</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../assets/game/robin-fight.css?v=robincity-clean-black">
+  <link rel="stylesheet" href="../assets/game/robin-fight.css?v=robin-call-v1">
 </head>
 <body>
   <main class="game-shell">
-    <section class="game-stage" aria-label="ROBINCITY Clean Up game">
+    <section class="game-stage" aria-label="Robincity Market Nights game">
       <div class="game-topbar">
         <nav class="site-nav" aria-label="Site navigation">
           <a href="../index.html">Home</a>
@@ -27,6 +27,9 @@
             <span id="healthText">HP 100</span>
             <span class="health-track"><span id="healthFill"></span></span>
           </span>
+          <span class="robin-call-meter" id="robinCallMeter" aria-label="Robin Call ready" title="Robin Call">
+            <span class="robin-call-icon" aria-hidden="true"></span>
+          </span>
           <button class="music-toggle" id="musicToggle" type="button" aria-pressed="false">Music Off</button>
         </div>
       </div>
@@ -34,7 +37,7 @@
       <div class="canvas-wrap">
         <canvas id="gameCanvas" width="1280" height="720"></canvas>
         <div class="start-panel" id="startPanel">
-          <h1>ROBINCITY Clean Up</h1>
+          <h1>Robincity Market Nights</h1>
           <form id="playerForm">
             <label for="playerName">Username</label>
             <div class="start-row">
@@ -58,6 +61,6 @@
   </main>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../assets/game/robin-fight-config.js?v=robincity-gestures-v1"></script>
-  <script src="../assets/game/robin-fight.js?v=black-gold-neon-arrows-v1"></script>
+  <script src="../assets/game/robin-fight.js?v=robin-call-v1"></script>
 </body>
 </html>

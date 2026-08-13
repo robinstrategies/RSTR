@@ -21,7 +21,7 @@ try {
   await expectOk(`${base}/pages/robin-fight.html`);
   await expectOk(`${base}/assets/game/robin-fight.js`);
   await expectOk(`${base}/assets/game/robin-fight-config.js`);
-  await expectOk(`${base}/assets/game/robinman-player-clean.png`);
+  await expectOk(`${base}/assets/game/robinman-player-black-gold-neon-arrows.png`);
   await expectOk(`${base}/assets/game/villains-bear-market.png`);
   await expectOk(`${base}/assets/game/bear-market-brute.png`);
   await expectOk(`${base}/assets/game/boss-v2.png`);
@@ -39,10 +39,10 @@ try {
   }
 
   const gameJs = await readFile(path.join(root, "assets", "game", "robin-fight.js"), "utf8");
-  for (const token of ["window.RobinFight", "snapshot: getSnapshot", "applyAction", "setAgentMode"]) {
+  for (const token of ["window.RobinFight", "snapshot: getSnapshot", "applyAction", "setAgentMode", "triggerRobinCall", "ROBIN_CALL_DAMAGE"]) {
     if (!gameJs.includes(token)) throw new Error(`Missing game control token: ${token}`);
   }
-  for (const token of ["setupGestureControls", "pointerdown", "playerAttack(\"kick\")", "playerAttack(\"punch\")"]) {
+  for (const token of ["setupGestureControls", "pointerdown", "isCircleGesture", "playerAttack(\"kick\")", "playerAttack(\"punch\")"]) {
     if (!gameJs.includes(token)) throw new Error(`Missing mobile gesture token: ${token}`);
   }
 
@@ -61,7 +61,7 @@ try {
   if (gameCss.includes(".gesture-hint")) throw new Error("Gesture hint CSS should not be present");
 
   for (const file of [
-    "assets/game/robinman-player-clean.png",
+    "assets/game/robinman-player-black-gold-neon-arrows.png",
     "assets/game/villains-bear-market.png",
     "assets/game/bear-market-brute.png",
     "tools/robin-fight-agent-server.mjs"

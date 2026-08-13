@@ -4,6 +4,7 @@ const scoreText = document.getElementById("scoreText");
 const waveText = document.getElementById("waveText");
 const healthText = document.getElementById("healthText");
 const healthFill = document.getElementById("healthFill");
+const robinCallMeter = document.getElementById("robinCallMeter");
 const startPanel = document.getElementById("startPanel");
 const playerForm = document.getElementById("playerForm");
 const playerNameInput = document.getElementById("playerName");
@@ -22,6 +23,10 @@ const MUSIC_KEY = "robinman-byte-fighter-music";
 const LEADERBOARD_RPC = "get_robin_fight_leaderboard";
 const SUBMIT_SCORE_FUNCTION = "submit-robin-score";
 const CONTROL_TEXT = "PC: arrows/WASD to move, J punch, K kick, Shift/L guard. Phone: drag left side to move; tap, swipe up, or hold right side to fight.";
+const BOSS_WAVE_INTERVAL = 5;
+const ROBIN_CALL_DAMAGE = 100;
+const ROBIN_CALL_COOLDOWN = 28;
+const ROBIN_CALL_DURATION = 1.45;
 
 const assets = {
   background: loadImage("../assets/game/alley-stage.png"),
@@ -98,6 +103,9 @@ function createState() {
     bearsInWave: 0,
     spawnedInWave: 0,
     bossSpawned: false,
+    robinCallCooldown: 0,
+    robinCallTimer: 0,
+    robinBirds: [],
     popups: [],
     items: [],
     player: {
@@ -124,7 +132,7 @@ function startGame(name) {
   state = createState();
   state.mode = "playing";
   gameStartTime = performance.now();
-  startPanel.querySelector("h1").textContent = "ROBINCITY Clean Up";
+  startPanel.querySelector("h1").textContent = "Robincity Market Nights";
   startPanel.querySelector("p").textContent = CONTROL_TEXT;
   startPanel.classList.add("is-hidden");
   running = true;
@@ -133,19 +141,21 @@ function startGame(name) {
   if (musicEnabled) startMusic();
 }
 
-function spawnEnemy(tier) {
+function spawnEnemy(tier, waveScale = 0) {
   const stats = tierStats[tier];
+  const hp = Math.round(stats.hp * (1 + waveScale * 0.12));
+  const damage = Math.round(stats.damage * (1 + waveScale * 0.065));
   state.enemies.push({
     tier,
     x: WIDTH + 90 + Math.random() * 160,
     y: GROUND_TOP + 74 + Math.random() * 112,
     w: 118 + tier * 18,
     h: 174 + tier * 17,
-    hp: stats.hp,
-    maxHp: stats.hp,
-    speed: stats.speed,
-    damage: stats.damage,
-    score: stats.score,
+    hp,
+    maxHp: hp,
+    speed: Math.min(142, stats.speed + waveScale * 3),
+    damage,
+    score: stats.score + waveScale * 55,
     frame: stats.frame,
     hitTimer: 0,
     attackTimer: 0.5 + Math.random() * 0.7,
@@ -159,7 +169,9 @@ function spawnEnemy(tier) {
   });
 }
 
-function spawnBear() {
+function spawnBear(waveScale = 0) {
+  const hp = Math.round(bearStats.hp * (1 + waveScale * 0.1));
+  const damage = Math.round(bearStats.damage * (1 + waveScale * 0.055));
   state.bearsInWave += 1;
   state.enemies.push({
     tier: 6,
@@ -167,11 +179,11 @@ function spawnBear() {
     y: GROUND_TOP + 118 + Math.random() * 72,
     w: 250,
     h: 324,
-    hp: bearStats.hp,
-    maxHp: bearStats.hp,
-    speed: bearStats.speed,
-    damage: bearStats.damage,
-    score: bearStats.score,
+    hp,
+    maxHp: hp,
+    speed: Math.min(76, bearStats.speed + waveScale * 2),
+    damage,
+    score: bearStats.score + waveScale * 120,
     frame: 0,
     hitTimer: 0,
     attackTimer: 0.8,
@@ -186,6 +198,9 @@ function spawnBear() {
 }
 
 function spawnBoss() {
+  const bossLevel = getBossLevel(state.wave);
+  const hp = Math.round(520 * (1 + (bossLevel - 1) * 0.34));
+  const damage = Math.round(36 * (1 + (bossLevel - 1) * 0.12));
   state.bossSpawned = true;
   state.enemies.push({
     tier: 5,
@@ -193,11 +208,11 @@ function spawnBoss() {
     y: 496,
     w: 235,
     h: 310,
-    hp: 520,
-    maxHp: 520,
-    speed: 58,
-    damage: 36,
-    score: 1800,
+    hp,
+    maxHp: hp,
+    speed: Math.min(88, 58 + (bossLevel - 1) * 5),
+    damage,
+    score: 1800 + (bossLevel - 1) * 650,
     frame: 0,
     hitTimer: 0,
     attackTimer: 0.6,
@@ -225,6 +240,7 @@ function update(dt) {
   updatePlayer(dt);
   updateWave(dt);
   updateEnemies(dt);
+  updateRobinCall(dt);
   updateItems(dt);
   updatePopups(dt);
 
@@ -234,13 +250,12 @@ function update(dt) {
     return false;
   });
 
-  if (state.player.hp <= 0) endGame("Game over");
-
-  if (state.wave === 5 && state.bossSpawned && state.enemies.length === 0) {
-    state.score += Math.max(0, Math.round(state.player.hp)) * 8;
-    addPopup("HP BONUS", state.player.x + 20, state.player.y - 170, "#f3eed9");
-    endGame("Winner");
+  if (state.player.hp <= 0) {
+    endGame("Game over");
+    return;
   }
+
+  if (isBossWave(state.wave) && state.bossSpawned && state.enemies.length === 0) completeBossWave();
 
   state.shake = Math.max(0, state.shake - dt * 18);
   updateHud();
@@ -289,21 +304,22 @@ function updatePlayer(dt) {
 
 function updateWave(dt) {
   const liveRegulars = state.enemies.filter((enemy) => enemy.kind === "enemy").length;
+  const wave = getWaveConfig(state.wave);
+  const waveScale = getWaveScale(state.wave);
 
-  if (state.wave <= waves.length) {
-    const wave = waves[state.wave - 1];
+  if (!isBossWave(state.wave)) {
     const liveBears = state.enemies.filter((enemy) => enemy.kind === "bear").length;
     state.spawnTimer -= dt;
     if (state.spawnedInWave < wave.count && liveRegulars < 4 && state.spawnTimer <= 0) {
       const tier = wave.tiers[state.spawnedInWave % wave.tiers.length];
-      spawnEnemy(tier);
+      spawnEnemy(tier, waveScale);
       state.spawnedInWave += 1;
-      state.spawnTimer = 0.75;
+      state.spawnTimer = Math.max(0.48, 0.75 - waveScale * 0.025);
     }
-    if (state.wave >= 2 && state.spawnedInWave > 1 && liveBears === 0 && state.bearsInWave < (state.wave >= 4 ? 2 : 1)) {
+    if (state.wave >= 2 && state.spawnedInWave > 1 && liveBears === 0 && state.bearsInWave < getBearLimit(state.wave)) {
       state.bearTimer -= dt;
       if (state.bearTimer <= 0) {
-        if (Math.random() < 0.58) spawnBear();
+        if (Math.random() < Math.min(0.72, 0.58 + waveScale * 0.02)) spawnBear(waveScale);
         state.bearTimer = 7 + Math.random() * 6;
       }
     }
@@ -320,7 +336,53 @@ function updateWave(dt) {
     return;
   }
 
-  if (!state.bossSpawned && state.enemies.length === 0) spawnBoss();
+  if (!state.bossSpawned && state.enemies.length === 0) {
+    addPopup(`BOSS ${getBossLevel(state.wave)}`, WIDTH / 2 - 60, 120, "#f3eed9");
+    spawnBoss();
+  }
+}
+
+function isBossWave(waveNumber) {
+  return waveNumber > 0 && waveNumber % BOSS_WAVE_INTERVAL === 0;
+}
+
+function getBossLevel(waveNumber) {
+  return Math.max(1, Math.floor(waveNumber / BOSS_WAVE_INTERVAL));
+}
+
+function getWaveScale(waveNumber) {
+  return Math.max(0, waveNumber - 1);
+}
+
+function getWaveConfig(waveNumber) {
+  const base = waves[(waveNumber - 1) % waves.length];
+  const cycle = Math.floor((waveNumber - 1) / waves.length);
+  const extraCount = Math.min(8, cycle * 2);
+  return {
+    count: base.count + extraCount,
+    tiers: base.tiers
+  };
+}
+
+function getBearLimit(waveNumber) {
+  if (waveNumber < 2) return 0;
+  if (waveNumber < 4) return 1;
+  return Math.min(4, 2 + Math.floor((waveNumber - 4) / 4));
+}
+
+function completeBossWave() {
+  const bossLevel = getBossLevel(state.wave);
+  const hpBonus = Math.max(0, Math.round(state.player.hp)) * (5 + bossLevel);
+  state.score += hpBonus;
+  addPopup(`+${hpBonus} HP BONUS`, state.player.x + 20, state.player.y - 170, "#f3eed9");
+  addPopup("BOSS CLEARED", WIDTH / 2 - 92, 120, "#79f1a8");
+  state.wave += 1;
+  state.bossSpawned = false;
+  state.spawnedInWave = 0;
+  state.spawnTimer = 1;
+  state.bearTimer = 5 + Math.random() * 5;
+  state.bearsInWave = 0;
+  playSfx("win");
 }
 
 function updateEnemies(dt) {
@@ -458,6 +520,49 @@ function damagePlayer(amount, enemy) {
 
   if (blocked && enemy) {
     enemy.x += Math.sign(enemy.x - player.x) * 16;
+  }
+}
+
+function triggerRobinCall() {
+  if (state.mode !== "playing" || state.robinCallCooldown > 0) return false;
+  state.robinCallCooldown = ROBIN_CALL_COOLDOWN;
+  state.robinCallTimer = ROBIN_CALL_DURATION;
+  state.robinBirds = createRobinBirds();
+  state.shake = Math.max(state.shake, 13);
+  let hitCount = 0;
+
+  for (const enemy of state.enemies) {
+    if (enemy.hp <= 0) continue;
+    enemy.hp -= ROBIN_CALL_DAMAGE;
+    enemy.hitTimer = Math.max(enemy.hitTimer, 0.28);
+    enemy.attackAnim = 0;
+    enemy.defendTimer = 0;
+    enemy.x += enemy.facing === -1 ? 18 : -18;
+    addPopup(`-${ROBIN_CALL_DAMAGE}`, enemy.x + enemy.w * 0.2, enemy.y - enemy.h + 64, "#ccff00");
+    hitCount += 1;
+  }
+
+  addPopup(hitCount ? "ROBIN CALL" : "ROBIN CALL READY", state.player.x + 4, state.player.y - 176, "#ccff00");
+  playSfx("robinCall");
+  return true;
+}
+
+function createRobinBirds() {
+  return Array.from({ length: 15 }, (_, index) => ({
+    startX: -160 - index * (42 + Math.random() * 18),
+    y: 82 + Math.random() * 500,
+    speed: 880 + Math.random() * 420,
+    size: 16 + Math.random() * 20,
+    phase: Math.random() * Math.PI * 2,
+    drift: (Math.random() - 0.5) * 120
+  }));
+}
+
+function updateRobinCall(dt) {
+  state.robinCallCooldown = Math.max(0, state.robinCallCooldown - dt);
+  state.robinCallTimer = Math.max(0, state.robinCallTimer - dt);
+  if (state.robinCallTimer <= 0 && state.robinBirds.length) {
+    state.robinBirds = [];
   }
 }
 
@@ -613,6 +718,7 @@ function playSfx(type) {
     heart: () => arpeggio([523.25, 659.25], t, 0.05, 0.1),
     immunity: () => arpeggio([659.25, 783.99, 987.77], t, 0.045, 0.1),
     bomb: () => playNoise(0.16, t, 0.28, sfxGain),
+    robinCall: () => arpeggio([987.77, 1174.66, 1567.98, 1318.51, 987.77], t, 0.045, 0.14),
     win: () => arpeggio([392, 523.25, 659.25, 783.99, 1046.5], t, 0.08, 0.16),
     gameOver: () => arpeggio([220, 196, 164.81, 130.81], t, 0.11, 0.18)
   };
@@ -820,6 +926,7 @@ function draw() {
     else drawEnemy(item);
   }
 
+  drawRobinCall();
   drawEnemyBars();
   drawPopups();
   drawOverlayMessage();
@@ -942,6 +1049,63 @@ function drawEnemyBars() {
   }
 }
 
+function drawRobinCall() {
+  if (state.robinCallTimer <= 0 || state.robinBirds.length === 0) return;
+  const progress = 1 - state.robinCallTimer / ROBIN_CALL_DURATION;
+  ctx.save();
+  ctx.globalCompositeOperation = "lighter";
+
+  for (const bird of state.robinBirds) {
+    const x = bird.startX + bird.speed * progress;
+    const y = bird.y + Math.sin(progress * Math.PI * 2 + bird.phase) * 34 + bird.drift * progress;
+    if (x < -80 || x > WIDTH + 120) continue;
+    const flap = Math.sin(progress * Math.PI * 18 + bird.phase);
+    drawRobinBird(x, y, bird.size, flap);
+  }
+
+  ctx.restore();
+}
+
+function drawRobinBird(x, y, size, flap) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(-0.08 + flap * 0.05);
+  ctx.strokeStyle = "rgba(204, 255, 0, 0.34)";
+  ctx.lineWidth = Math.max(2, size * 0.12);
+  ctx.beginPath();
+  ctx.moveTo(-size * 2.3, size * 0.1);
+  ctx.lineTo(-size * 0.55, 0);
+  ctx.stroke();
+
+  ctx.fillStyle = "rgba(3, 12, 8, 0.92)";
+  ctx.strokeStyle = "rgba(204, 255, 0, 0.78)";
+  ctx.lineWidth = Math.max(1.5, size * 0.08);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, size * 0.62, size * 0.28, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(-size * 0.12, 0);
+  ctx.quadraticCurveTo(-size * 0.9, -size * (0.85 + flap * 0.25), -size * 1.55, -size * 0.28);
+  ctx.quadraticCurveTo(-size * 0.82, -size * 0.12, -size * 0.12, 0);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(size * 0.08, 0);
+  ctx.quadraticCurveTo(size * 0.95, size * (0.78 + flap * 0.22), size * 1.62, size * 0.24);
+  ctx.quadraticCurveTo(size * 0.84, size * 0.13, size * 0.08, 0);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = "#ccff00";
+  ctx.beginPath();
+  ctx.arc(size * 0.48, -size * 0.04, Math.max(2, size * 0.11), 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
 function drawItems() {
   for (const item of state.items) {
     if (item.life <= 2 && Math.floor(item.life * 8) % 2 === 0) continue;
@@ -972,10 +1136,10 @@ function drawPopups() {
 
 function drawOverlayMessage() {
   if (state.mode !== "playing") return;
-  if (state.wave === 5 && state.bossSpawned) {
+  if (isBossWave(state.wave) && state.bossSpawned) {
     ctx.fillStyle = "rgba(243, 238, 217, 0.92)";
     ctx.font = "800 28px Cinzel, serif";
-    ctx.fillText("Final Boss", 52, 92);
+    ctx.fillText(`Boss ${getBossLevel(state.wave)}`, 52, 92);
   }
   if (state.player.immuneTimer > 0) {
     ctx.fillStyle = "rgba(243, 238, 217, 0.92)";
@@ -1043,13 +1207,24 @@ function drawBomb(x, y) {
 
 function updateHud() {
   const hpPct = clamp(state.player.hp / state.player.maxHp, 0, 1);
+  const robinCallPct = 1 - clamp(state.robinCallCooldown / ROBIN_CALL_COOLDOWN, 0, 1);
   scoreText.textContent = `Score ${Math.round(state.score)}`;
-  waveText.textContent = state.wave === 5 ? "Boss" : `Wave ${state.wave}`;
+  waveText.textContent = isBossWave(state.wave) ? `Boss ${getBossLevel(state.wave)}` : `Wave ${state.wave}`;
   healthText.textContent = `HP ${Math.round(state.player.hp)}`;
   healthFill.style.width = `${hpPct * 100}%`;
   healthFill.style.background = hpPct < 0.28
     ? "linear-gradient(90deg, #ff6f66, #ffcf5f)"
     : "linear-gradient(90deg, #d7f7b4, #35c96c)";
+  if (robinCallMeter) {
+    robinCallMeter.style.setProperty("--call-fill", `${robinCallPct * 100}%`);
+    robinCallMeter.classList.toggle("is-ready", state.robinCallCooldown <= 0);
+    robinCallMeter.setAttribute("aria-label", state.robinCallCooldown <= 0
+      ? "Robin Call ready"
+      : `Robin Call cooling down ${Math.ceil(state.robinCallCooldown)} seconds`);
+    robinCallMeter.title = state.robinCallCooldown <= 0
+      ? "Robin Call ready: press 0 or draw a circle"
+      : `Robin Call ${Math.ceil(state.robinCallCooldown)}s`;
+  }
 }
 
 function enemyBox(enemy) {
@@ -1118,6 +1293,8 @@ function getSnapshot() {
     score: Math.round(state.score),
     wave: state.wave,
     bossSpawned: state.bossSpawned,
+    robinCallCooldown: Number(state.robinCallCooldown.toFixed(2)),
+    robinCallReady: state.robinCallCooldown <= 0,
     running,
     player: {
       x: Math.round(state.player.x),
@@ -1172,6 +1349,7 @@ function applyAction(action = {}) {
   if (action.right) state.player.facing = 1;
   if (action.punch) playerAttack("punch");
   if (action.kick) playerAttack("kick");
+  if (action.robinCall) triggerRobinCall();
   return getSnapshot();
 }
 
@@ -1344,6 +1522,7 @@ function setupGestureControls() {
       x: point.x,
       y: point.y,
       width: point.width,
+      path: [{ x: point.x, y: point.y }],
       startedAt: performance.now(),
       holdTimer: 0,
       guarding: false
@@ -1375,9 +1554,21 @@ function setupGestureControls() {
     const point = pointerPoint(event);
     data.x = point.x;
     data.y = point.y;
+    data.path.push({ x: point.x, y: point.y });
 
     if (data.side === "move" && movePointerId === event.pointerId) {
       setMovement(point, data);
+    } else if (data.side === "action") {
+      const travelFromStart = Math.hypot(data.x - data.startX, data.y - data.startY);
+      const gestureDeadZone = Math.max(18, data.width * 0.025);
+      if (travelFromStart > gestureDeadZone && data.holdTimer) {
+        window.clearTimeout(data.holdTimer);
+        data.holdTimer = 0;
+        if (data.guarding) {
+          data.guarding = false;
+          releaseGuard();
+        }
+      }
     }
   });
 
@@ -1401,6 +1592,8 @@ function setupGestureControls() {
 
       if (data.guarding) {
         releaseGuard();
+      } else if (isCircleGesture(data)) {
+        triggerRobinCall();
       } else if (dy < -swipeDistance && Math.abs(dy) > Math.abs(dx) * 1.15) {
         playerAttack("kick");
       } else if (elapsed < 420) {
@@ -1426,14 +1619,54 @@ function setupGestureControls() {
   });
 }
 
+function isCircleGesture(data) {
+  if (!data.path || data.path.length < 10) return false;
+  const xs = data.path.map((point) => point.x);
+  const ys = data.path.map((point) => point.y);
+  const minX = Math.min(...xs);
+  const maxX = Math.max(...xs);
+  const minY = Math.min(...ys);
+  const maxY = Math.max(...ys);
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const minDiameter = Math.max(42, data.width * 0.055);
+  const maxRatio = Math.max(width, height) / Math.max(1, Math.min(width, height));
+  const closeDistance = Math.hypot(data.x - data.startX, data.y - data.startY);
+  const cx = (minX + maxX) / 2;
+  const cy = (minY + maxY) / 2;
+  let travel = 0;
+  let angleTravel = 0;
+  let previousAngle = Math.atan2(data.path[0].y - cy, data.path[0].x - cx);
+
+  for (let i = 1; i < data.path.length; i += 1) {
+    const prev = data.path[i - 1];
+    const point = data.path[i];
+    travel += Math.hypot(point.x - prev.x, point.y - prev.y);
+    const angle = Math.atan2(point.y - cy, point.x - cx);
+    let delta = angle - previousAngle;
+    while (delta > Math.PI) delta -= Math.PI * 2;
+    while (delta < -Math.PI) delta += Math.PI * 2;
+    angleTravel += delta;
+    previousAngle = angle;
+  }
+
+  return width >= minDiameter
+    && height >= minDiameter
+    && maxRatio < 1.65
+    && closeDistance < Math.max(46, Math.min(width, height) * 0.72)
+    && travel > Math.max(width, height) * 2.35
+    && Math.abs(angleTravel) > Math.PI * 1.55;
+}
+
 window.addEventListener("keydown", (event) => {
   const key = event.key.toLowerCase();
-  if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "j", "k", "l", "shift"].includes(key)) {
+  if (["arrowup", "arrowdown", "arrowleft", "arrowright", " ", "j", "k", "l", "shift", "0"].includes(key)) {
     event.preventDefault();
   }
   keys.add(key);
   if (key === "j") playerAttack("punch");
   if (key === "k") playerAttack("kick");
+  if (key === "0") triggerRobinCall();
 });
 
 window.addEventListener("keyup", (event) => {
