@@ -473,6 +473,57 @@ h3 {
   border-color: rgba(2, 14, 7, 0.48);
 }
 
+.social-row {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.social-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(2, 14, 7, 0.28);
+  border-radius: 999px;
+  background: rgba(204, 255, 0, 0.06);
+  color: #020705;
+  font-size: 1rem;
+  font-weight: 900;
+  line-height: 1;
+  opacity: 1;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease, opacity 160ms ease;
+}
+
+.social-button:hover {
+  transform: translateY(-1px);
+  background: rgba(204, 255, 0, 0.16);
+  border-color: rgba(2, 14, 7, 0.44);
+  opacity: 1;
+}
+
+.social-icon {
+  display: block;
+  width: 17px;
+  height: 17px;
+  object-fit: contain;
+  opacity: 0.96;
+}
+
+.social-icon-plane {
+  width: 20px;
+  height: 20px;
+  opacity: 1;
+}
+
+.social-icon-x {
+  width: 16px;
+  height: 16px;
+}
+
 .page-wrap {
   padding: 44px 0 72px;
   display: flex;
@@ -724,6 +775,16 @@ h3 {
     margin-inline: auto;
     gap: 8px 6px;
     margin-top: 14px;
+  }
+
+  .social-row {
+    gap: 7px;
+    margin-top: 12px;
+  }
+
+  .social-button {
+    width: 32px;
+    height: 28px;
   }
 
   .content-card {
