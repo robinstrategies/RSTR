@@ -153,5 +153,5 @@
   };
 
   loadTreasury();
-  window.setInterval(loadTreasury, 30000);
+  window.setInterval(loadTreasury, 300000);
 })();
