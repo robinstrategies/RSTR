@@ -610,6 +610,10 @@ h3 {
   text-align: center;
 }
 
+.treasury-holdings {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .tracker-box {
   padding: 18px;
   border: 1px solid var(--line);
@@ -630,6 +634,11 @@ h3 {
   font-family: "Cinzel", serif;
   font-size: 1.15rem;
   color: var(--ivory);
+}
+
+.tracker-status {
+  margin-bottom: 0;
+  font-size: 0.86rem;
 }
 
 .tracker-note {
