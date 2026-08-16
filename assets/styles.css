@@ -641,6 +641,15 @@ h3 {
   font-size: 0.86rem;
 }
 
+.hyperliquid-note {
+  margin-top: 20px;
+}
+
+.hyperliquid-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 0;
+}
+
 .tracker-note {
   margin-top: 18px;
   padding: 20px;
