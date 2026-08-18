@@ -1,11 +1,13 @@
 (() => {
   const TREASURY_ADDRESS = "0xB6Fd4D73e8641EFa499ef02F7568Bbf1372F3a57";
   const RSTR_TOKEN_ADDRESS = "0x07653b0e1A7fbBC343dc6f96d21A4bf40E628b44";
+  const INTC_TOKEN_ADDRESS = "0xc72b96e0E48ecd4DC75E1e45396e26300BC39681";
   const API_ROOT = "https://robinhoodchain.blockscout.com/api/v2";
   const HYPERLIQUID_API_ROOT = "https://api.hyperliquid.xyz";
 
   const ethEl = document.getElementById("treasury-eth");
   const rstrEl = document.getElementById("treasury-rstr");
+  const intcEl = document.getElementById("treasury-intc");
   const hyperliquidPositionsEl = document.getElementById("hyperliquid-positions");
   const statusEl = document.getElementById("treasury-status");
 
@@ -40,17 +42,14 @@
     return response.json();
   };
 
-  const fetchHyperliquid = async () => {
+  const fetchHyperliquidInfo = async (body) => {
     const response = await fetch(`${HYPERLIQUID_API_ROOT}/info`, {
       method: "POST",
       headers: {
         accept: "application/json",
         "content-type": "application/json",
       },
-      body: JSON.stringify({
-        type: "clearinghouseState",
-        user: TREASURY_ADDRESS,
-      }),
+      body: JSON.stringify(body),
       cache: "no-store",
     });
 
@@ -60,6 +59,18 @@
 
     return response.json();
   };
+
+  const fetchHyperliquid = () =>
+    fetchHyperliquidInfo({
+      type: "clearinghouseState",
+      user: TREASURY_ADDRESS,
+    });
+
+  const fetchHyperliquidSpot = () =>
+    fetchHyperliquidInfo({
+      type: "spotClearinghouseState",
+      user: TREASURY_ADDRESS,
+    });
 
   const formatNumber = (value, fractionDigits = 4) => {
     const number = Number(value);
@@ -71,15 +82,28 @@
     });
   };
 
-  const renderHyperliquidPositions = (positions) => {
+  const getHyperliquidWalletValue = (spotData) => {
+    const usdcBalance = (spotData?.balances || []).find((item) => item.coin === "USDC");
+    return usdcBalance?.total || "0";
+  };
+
+  const renderHyperliquidPositions = (hyperliquidData, hyperliquidSpotData) => {
     if (!hyperliquidPositionsEl) return;
 
+    const positions = hyperliquidData?.assetPositions || [];
     const openPositions = (positions || []).filter((item) => {
       return Number(item.position?.szi || 0) !== 0;
     });
+    const walletValueBox = `
+      <div class="tracker-box">
+        <p class="tracker-label">Wallet Value</p>
+        <p class="tracker-value">$${formatNumber(getHyperliquidWalletValue(hyperliquidSpotData), 2)}</p>
+      </div>
+    `;
 
     if (!openPositions.length) {
       hyperliquidPositionsEl.innerHTML = `
+        ${walletValueBox}
         <div class="tracker-box">
           <p class="tracker-label">Position</p>
           <p class="tracker-value">No Open Position</p>
@@ -88,7 +112,7 @@
       return;
     }
 
-    hyperliquidPositionsEl.innerHTML = openPositions
+    hyperliquidPositionsEl.innerHTML = walletValueBox + openPositions
       .map((item) => {
         const position = item.position;
         const size = Number(position.szi || 0);
@@ -120,14 +144,18 @@
 
   const loadTreasury = async () => {
     try {
-      const [addressData, tokenData, hyperliquidData] = await Promise.all([
+      const [addressData, tokenData, hyperliquidData, hyperliquidSpotData] = await Promise.all([
         fetchJson(`/addresses/${TREASURY_ADDRESS}`),
         fetchJson(`/addresses/${TREASURY_ADDRESS}/tokens?type=ERC-20`),
         fetchHyperliquid(),
+        fetchHyperliquidSpot(),
       ]);
 
       const rstrHolding = (tokenData.items || []).find((item) => {
         return item.token?.address_hash?.toLowerCase() === RSTR_TOKEN_ADDRESS.toLowerCase();
+      });
+      const intcHolding = (tokenData.items || []).find((item) => {
+        return item.token?.address_hash?.toLowerCase() === INTC_TOKEN_ADDRESS.toLowerCase();
       });
 
       if (ethEl) {
@@ -141,13 +169,21 @@
           : "0 RSTR";
       }
 
-      renderHyperliquidPositions(hyperliquidData.assetPositions);
+      if (intcEl) {
+        const decimals = Number(intcHolding?.token?.decimals || 18);
+        intcEl.textContent = intcHolding
+          ? `${formatUnits(intcHolding.value, decimals, 4)} INTC`
+          : "0 INTC";
+      }
+
+      renderHyperliquidPositions(hyperliquidData, hyperliquidSpotData);
       setStatus("Live from Robinhood Chain.");
     } catch (error) {
       console.error(error);
       if (ethEl) ethEl.textContent = "Unavailable";
       if (rstrEl) rstrEl.textContent = "Unavailable";
-      renderHyperliquidPositions([]);
+      if (intcEl) intcEl.textContent = "Unavailable";
+      renderHyperliquidPositions(null, null);
       setStatus("Could not load live holdings. Please refresh.");
     }
   };
