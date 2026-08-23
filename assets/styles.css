@@ -641,6 +641,13 @@ h3 {
   font-size: 0.86rem;
 }
 
+.treasury-address {
+  display: inline-block;
+  color: var(--ivory);
+  font-family: "Cinzel", serif;
+  overflow-wrap: anywhere;
+}
+
 .hyperliquid-note {
   margin-top: 20px;
 }

@@ -1,13 +1,15 @@
 (() => {
-  const TREASURY_ADDRESS = "0xB6Fd4D73e8641EFa499ef02F7568Bbf1372F3a57";
+  const TREASURY_ADDRESS = "0x77b6ab0572b43710ff06cd4d9d18f28eb22a5139";
   const RSTR_TOKEN_ADDRESS = "0x07653b0e1A7fbBC343dc6f96d21A4bf40E628b44";
   const INTC_TOKEN_ADDRESS = "0xc72b96e0E48ecd4DC75E1e45396e26300BC39681";
+  const USDG_TOKEN_ADDRESS = "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168";
   const API_ROOT = "https://robinhoodchain.blockscout.com/api/v2";
   const HYPERLIQUID_API_ROOT = "https://api.hyperliquid.xyz";
 
   const ethEl = document.getElementById("treasury-eth");
   const rstrEl = document.getElementById("treasury-rstr");
   const intcEl = document.getElementById("treasury-intc");
+  const usdgEl = document.getElementById("treasury-usdg");
   const hyperliquidPositionsEl = document.getElementById("hyperliquid-positions");
   const statusEl = document.getElementById("treasury-status");
 
@@ -157,6 +159,9 @@
       const intcHolding = (tokenData.items || []).find((item) => {
         return item.token?.address_hash?.toLowerCase() === INTC_TOKEN_ADDRESS.toLowerCase();
       });
+      const usdgHolding = (tokenData.items || []).find((item) => {
+        return item.token?.address_hash?.toLowerCase() === USDG_TOKEN_ADDRESS.toLowerCase();
+      });
 
       if (ethEl) {
         ethEl.textContent = `${formatUnits(addressData.coin_balance, 18, 4)} ETH`;
@@ -176,6 +181,13 @@
           : "0 INTC";
       }
 
+      if (usdgEl) {
+        const decimals = Number(usdgHolding?.token?.decimals || 6);
+        usdgEl.textContent = usdgHolding
+          ? `$${formatUnits(usdgHolding.value, decimals, 2)} USDG`
+          : "$0 USDG";
+      }
+
       renderHyperliquidPositions(hyperliquidData, hyperliquidSpotData);
       setStatus("Live from Robinhood Chain.");
     } catch (error) {
@@ -183,6 +195,7 @@
       if (ethEl) ethEl.textContent = "Unavailable";
       if (rstrEl) rstrEl.textContent = "Unavailable";
       if (intcEl) intcEl.textContent = "Unavailable";
+      if (usdgEl) usdgEl.textContent = "Unavailable";
       renderHyperliquidPositions(null, null);
       setStatus("Could not load live holdings. Please refresh.");
     }
