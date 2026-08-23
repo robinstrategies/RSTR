@@ -71,9 +71,18 @@ Deno.serve(async (request) => {
 });
 
 async function fetchJson(url: string) {
-  const response = await fetch(url, { headers: { accept: "application/json" } });
-  if (!response.ok) throw new Error(`Upstream request failed: ${response.status}`);
-  return response.json();
+  let lastError: Error | undefined;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      const response = await fetch(url, { headers: { accept: "application/json" } });
+      if (!response.ok) throw new Error(`Upstream request failed: ${response.status}`);
+      return response.json();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error("Upstream request failed");
+      if (attempt < 2) await new Promise((resolve) => setTimeout(resolve, 400 * (attempt + 1)));
+    }
+  }
+  throw lastError;
 }
 async function fetchOptionalJson(url: string) { try { return await fetchJson(url); } catch { return null; } }
 function decimalBalance(rawValue: unknown, decimals: number) {
