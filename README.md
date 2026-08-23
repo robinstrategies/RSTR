@@ -55,6 +55,11 @@ Supabase global scoreboard:
 
 The browser can read only the safe leaderboard RPC and submit scores through the Edge Function. Raw score-table rows are not public-readable or public-insertable.
 
+Treasury portfolio endpoint:
+
+1. Deploy `supabase/functions/treasury-portfolio` with JWT verification disabled; it only returns the public treasury wallet's trusted holdings.
+2. The tracker shows native ETH, USDG, WETH, RSTR, and active Robinhood Stock Tokens discovered from Robinhood's live asset registry. Unrecognized ERC-20s are intentionally hidden.
+
 Test commands:
 
 ```powershell

@@ -636,6 +636,12 @@ h3 {
   color: var(--ivory);
 }
 
+.tracker-subvalue {
+  margin: 8px 0 0;
+  color: rgba(243, 238, 217, 0.72);
+  font-size: 0.86rem;
+}
+
 .tracker-status {
   margin-bottom: 0;
   font-size: 0.86rem;
